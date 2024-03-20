@@ -4,4 +4,10 @@ format: html
 editor: visual
 ---
 
-Add proposal here...
+We are building a Shiny app that shows political affiliation over time in counties of North Carolina and filters by race, gender, population density, and age. 
+
+Data sources: <https://www.ncsbe.gov/results-data/voter-registration-data#historical-data>
+
+A one to two paragraph description of your goals, including your motivation. Depending on the focus of your project, the following might go in here.
+
+We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? 
