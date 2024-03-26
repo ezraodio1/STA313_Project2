@@ -4,10 +4,40 @@ format: html
 editor: visual
 ---
 
+## Overview
+
 We are building a Shiny app that shows political affiliation over time in counties of North Carolina and filters by race, gender, population density, and age. 
+
+## Goal and Motivation
+
+We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? 
+
+Our goal is to create a map of North Carolina split by counties. The map will look at each counties political affiliation by coloring each county by the political affiliation of people when they registered to vote. The map will also include a feature to filter by different voter stats such as race, gender, age, and date of registration.
+
+## Data sets
+
+We plan to use 1 data set. This data set shows registered voters stats such as race, gender, age, and date of registration. This data set will also show the political party each voter registered as when they signed up to vote.
 
 Data sources: <https://www.ncsbe.gov/results-data/voter-registration-data#historical-data>
 
-A one to two paragraph description of your goals, including your motivation. Depending on the focus of your project, the following might go in here.
+This data source includes many different variables. The variables we are most interested in are: county_id, county_desc (in order to map individuals to a county), race_code, ethnic_code, party_cd, gender_code, birth_year, age_at_year_end, and registr_dt.
 
-We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? 
+We will also use a data set of counties in North Carolina for our interactive map.
+
+## Weekly Plan of Attack
+
+-   Week 1: Come up with a plan for the project, finish project proposal, and find data. This will be done by everyone.
+
+-   Week 2: Jordan set up basic structure of Shiny app because she has the most experience with it. Everyone else will become familiar with how Shiny works and then help Jordan when applicable. Additionally, we will work on data pre-processing and exploratory data analysis.
+
+-   Week 3: Work on creating data visualizations. Each person will create their own visualization. 
+
+-   Week 4: Put the data visualizations in the shiny app. Everyone will work on this.
+
+-   Week 5: Finish building the application and deploy it. This will be done by everyone.
+
+-   Week 6: Put final touches on the project, look through rubric to make sure we meet all requirements, practice presentation. This will be done by everyone.
+
+## Organization
+
+The final organization of your project repository. This means describing the project organization in your proposal as well as implementing that organization in your repo. Create any folders needed and place a README.md in each folder explaining what goes in there.
