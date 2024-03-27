@@ -10,17 +10,17 @@ We are building a Shiny app that shows political affiliation over time in counti
 
 ## Goal and Motivation
 
-We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? 
+We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? How has the political affiliation in specific counties or locations in Durham changed over time and is it across all identities or more specific? These are some of the questions we hope to answer when building our Shiny app.
 
-Our goal is to create a map of North Carolina split by counties. The map will look at each counties political affiliation by coloring each county by the political affiliation of people when they registered to vote. The map will also include a feature to filter by different voter stats such as race, gender, age, and date of registration.
+Our goal is to create a map of North Carolina split by counties. The map will look at each counties political affiliation by coloring each county by the political affiliation of people when they registered to vote (on a red and blue scale). The map will also include a feature to filter by different voter stats such as race, gender, age, and date of registration, allowing the user to view only one of these categories or multiple.
 
 ## Data sets
 
-We plan to use 1 data set. This data set shows registered voters stats such as race, gender, age, and date of registration. This data set will also show the political party each voter registered as when they signed up to vote.
+We plan to use 1 data set. This data set comes from the North Carolina State Board of Elections and shows registered voters stats such as race, gender, age, and date of registration. This data set will also show the political party each voter registered as when they signed up to vote.
 
 Data sources: <https://www.ncsbe.gov/results-data/voter-registration-data#historical-data>
 
-This data source includes many different variables. The variables we are most interested in are: county_id, county_desc (in order to map individuals to a county), race_code, ethnic_code, party_cd, gender_code, birth_year, age_at_year_end, and registr_dt.
+This data source includes many different variables. The variables we are most interested in are: county_id, `county_desc` (in order to map individuals to a county), `race_code`, `ethnic_code`, `party_cd`, `gender_code`, `birth_year`, `age_at_year_end`, and `registr_dt`.
 
 We will also use a data set of counties in North Carolina for our interactive map.
 
