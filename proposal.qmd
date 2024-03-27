@@ -28,17 +28,59 @@ We will also use a data set of counties in North Carolina for our interactive ma
 
 ## Weekly Plan of Attack
 
--   Week 1: Come up with a plan for the project, finish project proposal, and find data. This will be done by everyone.
+**Week 1:**
 
--   Week 2: Jordan set up basic structure of Shiny app because she has the most experience with it. Everyone else will become familiar with how Shiny works and then help Jordan when applicable. Additionally, we will work on data pre-processing and exploratory data analysis.
+Malika: Work on motivation and methods
 
--   Week 3: Work on creating data visualizations. Each person will create their own visualization. 
+Sam: Work on finding data sources 
 
--   Week 4: Put the data visualizations in the shiny app. Everyone will work on this.
+Ezra: Work on repo organization
 
--   Week 5: Finish building the application and deploy it. This will be done by everyone.
+Jordan: Work on procedure + utilizing data sources 
 
--   Week 6: Put final touches on the project, look through rubric to make sure we meet all requirements, practice presentation. This will be done by everyone.
+**Week 2:**
+
+Jordan: Set up basic structure of Shiny app because she has the most experience with it
+
+(Malika, Ezra, Sam): Become familiar with Shiny and Plotly to create filters and interactive features 
+
+All: Work on data pre-processing and exploratory data analysis.
+
+**Week 3:**
+
+Jordan: Create filter functions for county data
+
+Malika: Create shape files for North Carolina / aesthetic elements
+
+Ezra + Sam: Clean Data Files for Elections 
+
+**Week 4:**
+
+All: Implement data into shiny app, confirm interactive element works
+
+We may to split the data into sections for everyone to implement into shiny 
+
+**Week 5:**
+
+Jordan: Ensure side-by-side feature is effective for registered and actual votes, work on Conclusion in project write-up
+
+Malika: Create appropriate red to blue scale, and ensure this is aesthetically clean for all filters, work on Introduction and Methods in project-write up
+
+Sam: Implement any user fixes, work on project write-up to explain challenges and limitations, 
+
+Ezra: Work on project final touches and work on presentation draft to clean up all write-up and create a uniform format 
+
+**Week 6:**
+
+Malika: Work on individual slide(s) and practice presentation
+
+Jordan: Work on individual slide(s) and practice presentation
+
+Ezra: Work on individual slide(s) and practice presentation
+
+Sam: Work on individual slide(s) and practice presentation
+
+All: Look through rubric and make edits where needed
 
 ## Organization
 
