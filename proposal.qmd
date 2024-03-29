@@ -103,4 +103,4 @@ All: Look through rubric and make edits where needed
 
 ## Organization
 
-We plan to have a data folder in our project repo that stores the dataset files we'll be using. Additionally, we will have a folder of .R files that stores code for helper functions that we'll call into our .qmd file that we'll use for our write-up. We expect to have helper functions that build interactive maps and filter the data. Lastly, we will have a .R file that actually runs our shiny app.
+We plan to have a data folder in our project repo that stores the dataset files we'll be using. Additionally, we will have a folder of .R files that stores code for helper functions that we'll call into our .qmd file that we'll use for our write-up. We expect to have helper functions that build interactive maps and filter the data. Lastly, we will have a .R file that actually runs our shiny app. Our Readme includes a breakdown of our datasets.
