@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -64,34 +98,94 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>We are building a Shiny app that shows political affiliation over time in counties of North Carolina and filters by race, gender, population density, and age.&nbsp;</p>
+<p>We are building a Shiny app that shows political affiliation over time in counties of North Carolina and filters by race, gender, population density, and age for the past 6 elecctions.&nbsp;</p>
 </section>
 <section id="goal-and-motivation" class="level2">
 <h2 class="anchored" data-anchor-id="goal-and-motivation">Goal and Motivation</h2>
-<p>We aim to observe changes in political affiliation of the counties of North Carolina for the last ten years. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? How has the political affiliation in specific counties or locations in Durham changed over time and is it across all identities or more specific? These are some of the questions we hope to answer when building our Shiny app.</p>
-<p>Our goal is to create a map of North Carolina split by counties. The map will look at each counties political affiliation by coloring each county by the political affiliation of people when they registered to vote (on a red and blue scale). The map will also include a feature to filter by different voter stats such as race, gender, age, and date of registration, allowing the user to view only one of these categories or multiple.</p>
+<p>We aim to observe changes in political affiliation of the counties of North Carolina for the last six elections. We chose North Carolina because it is a swing state so we feel there will be more change in political affiliation and we also vote in North Carolina, so we are interested in understanding the breakdown of voter history here. By examining census data over time, while filtering for race, gender, population density, and age, we hope to rationalize the political changes over time. We are also curious about how major events such as the 2008 recession, COVID-19, and more have impacted political affiliation. Are those in specific categories of race, gender, population density, and age more susceptible to political changes? How has the political affiliation in specific counties or locations in Durham changed over time and is it across all identities or more specific? These are some of the questions we hope to answer when building our Shiny app.</p>
+<p>Our goal is to create two maps of North Carolina split by counties, side-by-side. Both maps will look at each counties political affiliation by coloring each county by the total votes for each party in the selected election year (on a red and blue scale). Each map with have a year option in order to show two different election years side by side, in order to compare changes over time. Both maps will include a feature to filter the counties shown by different voter stats such as race percentage, population, sex percentage, and age percentage. For example you could look at the county with the highest female population and see how their county voted in a specific election. Additionally, users will be able to filter for counties based on the population metric, race, or age (for example, counties with population sizes greater that 200,000) and will be able to specifically view the political affiliations of the counties that meet the threshold.</p>
+<p>We plan to use the Shiny interface to create both maps by adding a dropdown function for the filters, a shiny button to generate the map, and utilize behind the scenes functions such as helper, server, and output functions to display the counties that the user has filtered for.</p>
 </section>
 <section id="data-sets" class="level2">
 <h2 class="anchored" data-anchor-id="data-sets">Data sets</h2>
-<p>We plan to use 1 data set. This data set comes from the North Carolina State Board of Elections and shows registered voters stats such as race, gender, age, and date of registration. This data set will also show the political party each voter registered as when they signed up to vote.</p>
-<p>Data sources: <a href="https://www.ncsbe.gov/results-data/voter-registration-data#historical-data" class="uri">https://www.ncsbe.gov/results-data/voter-registration-data#historical-data</a></p>
-<p>This data source includes many different variables. The variables we are most interested in are: county_id, <code>county_desc</code> (in order to map individuals to a county), <code>race_code</code>, <code>ethnic_code</code>, <code>party_cd</code>, <code>gender_code</code>, <code>birth_year</code>, <code>age_at_year_end</code>, and <code>registr_dt</code>.</p>
-<p>We will also use a data set of counties in North Carolina for our interactive map.</p>
+<p>We plan to use 12 data sets. 6 of our datasets are presidential election results in the election years from 2000 until 2020. The other 6 data sets are county demographic data from the six years of presidential elections from 2000 until 2020. The first set data set comes from the North Carolina State Board of Elections and shows the total votes for each county based on the type of election, choice party, absentee by mail and many other factors. We are only interested in the total votes per county for each choice party so we decided to roll up the data to show <code>County</code>, <code>Choice_Party</code>, and <code>Total_Votes</code>. The second set of data sets come from the NC Office of State Budget and Management. These data sets include data on demographic factors by county such as race, sex, and age. We will also calculate the population of each county by rolling up the data set and grouping by county.</p>
+<p>Data sources:</p>
+<p><a href="https://www.ncsbe.gov/results-data/election-results/historical-election-results-data#by-precinct" class="uri">https://www.ncsbe.gov/results-data/election-results/historical-election-results-data#by-precinct</a></p>
+<p><a href="https://www.osbm.nc.gov/facts-figures/population-demographics" class="uri">https://www.osbm.nc.gov/facts-figures/population-demographics</a></p>
+<p>We included the code that will we use to roll up each election data set for the year 2020 below, so you could see an example of how our election data will display.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.0     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="st">"data/2020.txt"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Election2020 <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(file_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 257721 Columns: 16
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "\t" chr
+(8): County, Election Date, Precinct, Contest Type, Contest Name, Choice... dbl
+(7): Contest Group ID, Vote For, Election Day, One Stop, Absentee by Mai... lgl
+(1): ...16
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...16`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Election2020 <span class="ot">&lt;-</span> Election2020 <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Total_Votes =</span> <span class="st">`</span><span class="at">Total Votes</span><span class="st">`</span>, <span class="at">Choice_Party =</span> <span class="st">`</span><span class="at">Choice Party</span><span class="st">`</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Election2020_Summary <span class="ot">&lt;-</span> Election2020 <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Choice_Party <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DEM"</span>, <span class="st">"REP"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County, Choice_Party) <span class="sc">|&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Total_Votes =</span> <span class="fu">sum</span>(Total_Votes, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(County, Choice_Party)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="weekly-plan-of-attack" class="level2">
 <h2 class="anchored" data-anchor-id="weekly-plan-of-attack">Weekly Plan of Attack</h2>
-<ul>
-<li><p>Week 1: Come up with a plan for the project, finish project proposal, and find data. This will be done by everyone.</p></li>
-<li><p>Week 2: Jordan set up basic structure of Shiny app because she has the most experience with it. Everyone else will become familiar with how Shiny works and then help Jordan when applicable. Additionally, we will work on data pre-processing and exploratory data analysis.</p></li>
-<li><p>Week 3: Work on creating data visualizations. Each person will create their own visualization.&nbsp;</p></li>
-<li><p>Week 4: Put the data visualizations in the shiny app. Everyone will work on this.</p></li>
-<li><p>Week 5: Finish building the application and deploy it. This will be done by everyone.</p></li>
-<li><p>Week 6: Put final touches on the project, look through rubric to make sure we meet all requirements, practice presentation. This will be done by everyone.</p></li>
-</ul>
+<p><strong>Week 1:</strong></p>
+<p>Malika: Work on motivation and methods</p>
+<p>Sam: Work on finding data sources&nbsp;</p>
+<p>Ezra: Work on repo organization</p>
+<p>Jordan: Work on procedure + utilizing data sources&nbsp;</p>
+<p><strong>Week 2:</strong></p>
+<p>Jordan: Set up basic structure of Shiny app because she has the most experience with it</p>
+<p>(Malika, Ezra, Sam): Become familiar with Shiny and Plotly to create filters and interactive features&nbsp;</p>
+<p>All: Work on data pre-processing and exploratory data analysis.</p>
+<p><strong>Week 3:</strong></p>
+<p>Jordan: Create filter functions for county data</p>
+<p>Malika: Create shape files for North Carolina / aesthetic elements</p>
+<p>Ezra + Sam: Clean Data Files for Elections&nbsp;</p>
+<p><strong>Week 4:</strong></p>
+<p>All: Implement data into shiny app, confirm interactive element works</p>
+<p>We may to split the data into sections for everyone to implement into shiny&nbsp;</p>
+<p><strong>Week 5:</strong></p>
+<p>Jordan: Ensure side-by-side feature is effective for registered and actual votes, work on Conclusion in project write-up</p>
+<p>Malika: Create appropriate red to blue scale, and ensure this is aesthetically clean for all filters, work on Introduction and Methods in project-write up</p>
+<p>Sam: Implement any user fixes, work on project write-up to explain challenges and limitations,&nbsp;</p>
+<p>Ezra: Work on project final touches and work on presentation draft to clean up all write-up and create a uniform format&nbsp;</p>
+<p><strong>Week 6:</strong></p>
+<p>Malika: Work on individual slide(s) and practice presentation</p>
+<p>Jordan: Work on individual slide(s) and practice presentation</p>
+<p>Ezra: Work on individual slide(s) and practice presentation</p>
+<p>Sam: Work on individual slide(s) and practice presentation</p>
+<p>All: Look through rubric and make edits where needed</p>
 </section>
 <section id="organization" class="level2">
 <h2 class="anchored" data-anchor-id="organization">Organization</h2>
-<p>The final organization of your project repository. This means describing the project organization in your proposal as well as implementing that organization in your repo. Create any folders needed and place a README.md in each folder explaining what goes in there.</p>
+<p>We plan to have a data folder in our project repo that stores the dataset files we’ll be using. Additionally, we will have a folder of .R files that stores code for helper functions that we’ll call into our .qmd file that we’ll use for our write-up. We expect to have helper functions that build interactive maps and filter the data. Lastly, we will have a .R file that actually runs our shiny app.</p>
 </section>
 
 </main>
