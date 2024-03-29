@@ -18,13 +18,34 @@ We plan to use the Shiny interface to create both maps by adding a dropdown func
 
 ## Data sets
 
-We plan to use 1 data set. This data set comes from the North Carolina State Board of Elections and shows registered voters stats such as race, gender, age, and date of registration. This data set will also show the political party each voter registered as when they signed up to vote.
+We plan to use 9 data sets. 6 of our datasets are presidential election results in the election years from 2000 until 2020. The other 3 data sets are American Community Survey data from the six years of presidential elections from 2000 until 2020. The first set data set comes from the North Carolina State Board of Elections and shows the total votes for each county based on the type of election, choice party, absentee by mail and many other factors. We are only interested in the total votes per county for each choice party so we decided to roll up the data to show `County`, `Choice_Party`, and `Total_Votes`. The second set of data sets come from the United States Census Bureau. These data set include data on demographic factors by county such as race, sex, and age. One limitation is the census data is only every 10 years, so we only have data from 2000, 2010, and 2020 on county demographics.
 
-Data sources: <https://www.ncsbe.gov/results-data/voter-registration-data#historical-data>
+Data sources:
+
+<https://www.ncsbe.gov/results-data/election-results/historical-election-results-data#by-precinct>
+
+<https://www.census.gov/en.html>
 
 This data source includes many different variables. The variables we are most interested in are: county_id, `county_desc` (in order to map individuals to a county), `race_code`, `ethnic_code`, `party_cd`, `gender_code`, `birth_year`, `age_at_year_end`, and `registr_dt`.
 
-We will also use a data set of counties in North Carolina for our interactive map.
+We included the code that will we use to roll up each election data set for the year 2020 below, so you could see an example of how our election data will display.
+
+```{r}
+library(tidyverse)
+library(readr)
+
+file_path <- "data/2020.txt"
+Election2020 <- read_tsv(file_path)
+
+Election2020 <- Election2020 |>
+  rename(Total_Votes = `Total Votes`, Choice_Party = `Choice Party`)
+
+Election2020_Summary <- Election2020 |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+```
 
 ## Weekly Plan of Attack
 
