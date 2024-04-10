@@ -1,0 +1,106 @@
+```{r}
+library(tidyverse)
+library(readr)
+
+#2020
+file_path <- "data/2020.txt"
+Election2020 <- read_tsv(file_path)
+
+Election2020 <- Election2020 |>
+  rename(Total_Votes = `Total Votes`, Choice_Party = `Choice Party`)
+
+Election2020_Summary <- Election2020 |>
+  filter(`Contest Name` == "US PRESIDENT") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party) 
+
+Election2020_Summary$Year <- 2020
+  
+
+#2016
+file_path <- "data/2016.txt"
+Election2016 <- read_tsv(file_path)
+
+Election2016 <- Election2016 |>
+  rename(Total_Votes = `Total Votes`, Choice_Party = `Choice Party`)
+
+Election2016_Summary <- Election2016 |>
+  filter(`Contest Name` == "US PRESIDENT") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+
+Election2016_Summary$Year <- 2016
+
+#2012
+file_path <- "data/2012.txt"
+Election2012 <- read_delim(file_path, delim = ",")
+
+Election2012 <- Election2012 |>
+  rename(`Total_Votes` = `total votes`, County = county, `Choice_Party` = party) 
+
+Election2012_Summary <- Election2012 |>
+  filter(contest == "PRESIDENT AND VICE PRESIDENT OF THE UNITED STATES") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+
+Election2012_Summary$Year <- 2012
+
+#2008
+file_path <- "data/2008.txt"
+Election2008 <- read_delim(file_path, delim = ",")
+
+Election2008 <- Election2008 |>
+  rename(`Total_Votes` = `total votes`, County = county, `Choice_Party` = party) 
+
+Election2008_Summary <- Election2008 |>
+  filter(contest == "PRESIDENT AND VICE PRESIDENT OF THE UNITED STATES") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+
+Election2008_Summary$Year <- 2008
+
+#2004
+file_path <- "data/2004.txt"
+Election2004 <- read_delim(file_path, delim = ",")
+
+Election2004 <- Election2004 |>
+  rename(`Total_Votes` = ballot_count, County = county, `Choice_Party` = party_cd) 
+
+Election2004_Summary <- Election2004 |>
+  filter(contest_name == "US PRESIDENT") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+
+Election2004_Summary$Year <- 2004
+
+#2000
+file_path <- "data/2000.txt"
+Election2000 <- read_tsv(file_path, col_names = FALSE)
+
+Election2000 <- Election2000 |>
+  rename(`Total_Votes` = X8, County = X1, `Choice_Party` = X7, `contest` = X5) 
+
+Election2000_Summary <- Election2000 |>
+  filter(contest == "PRESIDENT-VICE PRESIDENT") |>
+  filter(Choice_Party %in% c("DEM", "REP")) |>
+  group_by(County, Choice_Party) |>
+  summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
+  arrange(County, Choice_Party)
+
+Election2000_Summary$Year <- 2000
+```
+
+```{r}
+election_data <- rbind(Election2000_Summary, Election2004_Summary, Election2008_Summary, 
+                       Election2012_Summary, Election2016_Summary, Election2020_Summary)
+```

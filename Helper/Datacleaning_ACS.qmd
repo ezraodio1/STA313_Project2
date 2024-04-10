@@ -1,0 +1,7 @@
+```{r}
+library(tidyverse)
+library(readr)
+
+file_path <- "data/ACS2000.numbers"
+ACS2000 <- read_tsv(file_path)
+```
