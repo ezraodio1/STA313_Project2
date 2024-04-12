@@ -37,3 +37,17 @@ The election data sets are called Election[year]_summary. There are 6 of them: o
 - `Couunty`: North Carolina County
 - `Choice_Party`: The political party
 - `Total_Votes`: Total votes for that specific county and political party.
+
+
+After cleaning our data sets we are left with two data sets one called ACSall 
+and the other is election_data. 
+
+ACSall is a merged dataset of the 6 individual asc csv for 2000,2004,2008,2012,
+2016 and 2020 with the same variables as before. 
+
+election_data is also a merged data set with all the 6 individual election data
+that contains 1000 observations and 4 variables:
+- `Couunty`: North Carolina County
+- `Choice_Party`: The political party
+- `Total_Votes`: Total votes for that specific county and political party.
+- `Year`: Year of election 
