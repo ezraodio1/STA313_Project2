@@ -34,6 +34,6 @@ For the ACS data these are the columns and their meaning
 - `geo_point_2d`: Geographic point in 2D.
 
 The election data sets are called Election[year]_summary. There are 6 of them: one for each election year. Each data set contains 3 columns:
-- `Couunty`: North Carolina County
+- `County`: North Carolina County
 - `Choice_Party`: The political party
 - `Total_Votes`: Total votes for that specific county and political party.

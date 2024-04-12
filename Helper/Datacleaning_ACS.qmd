@@ -1,22 +1,60 @@
+
 ```{r}
+#| label: load packages
+
 library(tidyverse)
 library(readr)
+```
+
+
+```{r}
+#| label: read in data
 
 file_path <- "data/ACS2000.csv"
-ACS2000 <- read_csv(file_path)
+ACS2000 <- read_csv(file_path, show_col_types = FALSE)
 
 file_path <- "data/ACS2004.csv"
-ACS200 <- read_csv(file_path)
+ACS2004 <- read_csv(file_path, show_col_types = FALSE)
 
 file_path <- "data/ACS2008.csv"
-ACS2008 <- read_csv(file_path)
+ACS2008 <- read_csv(file_path, show_col_types = FALSE)
 
 file_path <- "data/ACS2012.csv"
-ACS2012 <- read_csv(file_path)
+ACS2012 <- read_csv(file_path, show_col_types = FALSE)
 
 file_path <- "data/ACS2016.csv"
-ACS2016 <- read_csv(file_path)
+ACS2016 <- read_csv(file_path, show_col_types = FALSE)
 
 file_path <- "data/ACS2020.csv"
-ACS2020 <- read_csv(file_path)
+ACS2020 <- read_csv(file_path, show_col_types = FALSE)
 ```
+
+```{r}
+#| label: data cleaning
+
+#Drop unnecessary columns
+cols_to_drop <- c("Vintage", "Estimate/Projection", "Region", "COG", "MSA", 
+                  "Age 0 to 2", "Age 3 to 4", "Age 5", "Age 6 to 9", 
+                  "Age 10 to 13", "Age 14", "Age 15", "Age 16 to 17", 
+                  "Age 0 to 17")
+
+ACS2000 <- ACS2000[,!(names(ACS2000) %in% cols_to_drop)]
+ACS2004 <- ACS2004[,!(names(ACS2004) %in% cols_to_drop)]
+ACS2008 <- ACS2008[,!(names(ACS2008) %in% cols_to_drop)]
+ACS2012 <- ACS2012[,!(names(ACS2012) %in% cols_to_drop)]
+ACS2016 <- ACS2016[,!(names(ACS2016) %in% cols_to_drop)]
+ACS2020 <- ACS2020[,!(names(ACS2020) %in% cols_to_drop)]
+
+#Fill in NAs with 0s
+ACS2000[is.na(ACS2000)] <- 0
+ACS2004[is.na(ACS2004)] <- 0
+ACS2008[is.na(ACS2008)] <- 0
+ACS2012[is.na(ACS2012)] <- 0
+ACS2016[is.na(ACS2016)] <- 0
+ACS2020[is.na(ACS2020)] <- 0
+
+#Combine all dataframes into one
+ACSall <- bind_rows(ACS2000, ACS2004, ACS2008, ACS2012, ACS2016, ACS2020)
+```
+
+
