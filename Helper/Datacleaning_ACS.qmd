@@ -2,6 +2,21 @@
 library(tidyverse)
 library(readr)
 
-file_path <- "data/ACS2000.numbers"
-ACS2000 <- read_tsv(file_path)
+file_path <- "data/ACS2000.csv"
+ACS2000 <- read_csv(file_path)
+
+file_path <- "data/ACS2004.csv"
+ACS200 <- read_csv(file_path)
+
+file_path <- "data/ACS2008.csv"
+ACS2008 <- read_csv(file_path)
+
+file_path <- "data/ACS2012.csv"
+ACS2012 <- read_csv(file_path)
+
+file_path <- "data/ACS2016.csv"
+ACS2016 <- read_csv(file_path)
+
+file_path <- "data/ACS2020.csv"
+ACS2020 <- read_csv(file_path)
 ```
