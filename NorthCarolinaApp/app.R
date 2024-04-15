@@ -6,7 +6,8 @@ library(scales)
 library(RColorBrewer)
 
 
-
+# Load data --------------------------------------------------------------------
+election_data3 <- read.csv("data for app/election-data3.csv")
 
 
 # Define UI for application
@@ -80,7 +81,7 @@ server <- function(input, output, session) {
   
   observe({
     print(input$county)
-    county_picked <- election_data3[election_data2$County == input$county, ]
+    county_picked <- election_data3[election_data3$County == input$county, ]
       
     if(nrow(county_picked)> 0){
     lat <- county_picked$Lat
