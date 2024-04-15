@@ -6,11 +6,7 @@ library(scales)
 library(RColorBrewer)
 
 
-election_data <- read_csv(
-  "data for app/election-data.csv",
-  na = c("", "NA"),
-  show_col_types = FALSE
-)
+
 
 
 # Define UI for application
@@ -23,8 +19,8 @@ ui <- fluidPage(
     sidebarLayout(
       sidebarPanel(
         selectInput("county", "Choose a County to View:",
-                    choices = election_data$County,
-                    selected = election_data$County[1]),
+                    choices = election_data3$County,
+                    selected = election_data3$County[1]),
         
         sliderInput("year",
                     "Election Year:",
@@ -40,16 +36,16 @@ ui <- fluidPage(
 )
 
 #Change datatype to numeric
-election_data$Lat <- as.numeric(as.character(election_data$Lat))
-election_data$Long <- as.numeric(as.character(election_data$Long))
+election_data3$Lat <- as.numeric(as.character(election_data3$Lat.y))
+election_data3$Long <- as.numeric(as.character(election_data3$Long.y))
 # Define server logic 
 server <- function(input, output, session) {
     geojson_data <- reactive({
     geojson_stuff <- readLines("data for app/nc_counties.geojson")
     geojson <- paste(geojson_stuff, collapse = "")
     geojson <- jsonlite::fromJSON(geojson, flatten = TRUE)
-    if (!is.null(geojson) && !is.null(election_data)) {
-      geojson$features$properties$Votes_REP <- election_data$Votes_REP[match(geojson$features$properties$NAME, election_data$County)]
+    if (!is.null(geojson) && !is.null(election_data3)) {
+      geojson$features$properties$Votes_REP <- election_data3$Votes_REP[match(geojson$features$properties$NAME, election_data3$County)]
     } else {
       print("Geojson or election_data is null.")
     }
@@ -57,16 +53,16 @@ server <- function(input, output, session) {
 })
   
   scaling_fill <- reactive({
-    max_votes <- max(election_data$Votes_REP, na.rm = TRUE)
-    min_votes <- min(election_data$Votes_REP, na.rm = TRUE)
-    rescale(election_data$Votes_REP, to = c(0,1), from = c(min_votes, max_votes))
+    max_votes <- max(election_data3$Votes_REP, na.rm = TRUE)
+    min_votes <- min(election_data3$Votes_REP, na.rm = TRUE)
+    rescale(election_data3$Votes_REP, to = c(0,1), from = c(min_votes, max_votes))
   })
   
   colors_scaled <- colorRampPalette(c("lightpink", "red"))
   
   
   observe({
-    updateSelectInput(session, "county", choices = election_data$County)
+    updateSelectInput(session, "county", choices = election_data3$County)
   })
   
   output$map <- renderLeaflet({
@@ -84,7 +80,7 @@ server <- function(input, output, session) {
   
   observe({
     print(input$county)
-    county_picked <- election_data[election_data$County == input$county, ]
+    county_picked <- election_data3[election_data2$County == input$county, ]
       
     if(nrow(county_picked)> 0){
     lat <- county_picked$Lat

@@ -105,4 +105,30 @@ election_data <- rbind(Election2000_Summary, Election2004_Summary, Election2008_
                        Election2012_Summary, Election2016_Summary, Election2020_Summary)
 ```
 
+```{r}
+#reading in longitude and latitude data
+geography_nc <- read_csv("data/NCCounties2.csv")
+separate_geo <- geography_nc |>
+  separate(col = `Spreadsheet List of All counties in North Carolina.csv_exported`,
+           into = c("County", "Lat", "Long"), sep = ",", convert = TRUE)
+separate_geo <- separate_geo |>
+  slice(-1) 
+separate_geo$County <- toupper(separate_geo$County)
+election_data2 <- left_join(election_data, separate_geo, by = "County")
+election_data2 <- select(election_data2, -Lat.x, -Long.x)
+
+
+
+#reshaping total votes into dem and rep votes
+election_data3 <- election_data2 |>
+  pivot_wider(
+    names_from = Choice_Party,
+    values_from = Total_Votes,
+    names_prefix = "Votes_"
+ ) |>
+  replace_na(list(Votes_DEM = 0, Votes_REP = 0))
+
+write_csv(election_data3, "data/election-data3.csv")
+
+```
 
