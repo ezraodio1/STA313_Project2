@@ -5,6 +5,14 @@ library(jsonlite)
 library(scales)
 library(RColorBrewer)
 
+
+election_data <- read_csv(
+  "data for app/election-data.csv",
+  na = c("", "NA"),
+  show_col_types = FALSE
+)
+
+
 # Define UI for application
 ui <- fluidPage(
 

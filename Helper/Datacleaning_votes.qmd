@@ -104,3 +104,5 @@ Election2000_Summary$Year <- 2000
 election_data <- rbind(Election2000_Summary, Election2004_Summary, Election2008_Summary, 
                        Election2012_Summary, Election2016_Summary, Election2020_Summary)
 ```
+
+
