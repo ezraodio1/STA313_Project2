@@ -53,8 +53,12 @@ ACS2012[is.na(ACS2012)] <- 0
 ACS2016[is.na(ACS2016)] <- 0
 ACS2020[is.na(ACS2020)] <- 0
 
-#Combine all dataframes into one
-ACSall <- bind_rows(ACS2000, ACS2004, ACS2008, ACS2012, ACS2016, ACS2020)
+#Write cleaned .csv files to app data folder
+write_csv(ACS2000, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2000_cleaned.csv")
+write_csv(ACS2004, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2004_cleaned.csv")
+write_csv(ACS2008, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2008_cleaned.csv")
+write_csv(ACS2012, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2012_cleaned.csv")
+write_csv(ACS2016, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2016_cleaned.csv")
+write_csv(ACS2020, "../../project-2-team_spring/NorthCarolinaApp/data for app/ACS2020_cleaned.csv")
 ```
-
 
