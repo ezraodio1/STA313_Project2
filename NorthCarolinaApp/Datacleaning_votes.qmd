@@ -118,7 +118,22 @@ separate_geo <- separate_geo |>
 
 separate_geo$County <- toupper(separate_geo$County)
 
+
+#reshaping total votes into dem and rep votes
+#election_data <- election_data |>
+#  pivot_wider(
+#    names_from = Choice_Party,
+#    values_from = Total_Votes,
+#    names_prefix = "Votes_"
+#  ) |>
+#  replace_na(list(Votes_DEM = 0, Votes_REP = 0))
+
+#election_data <- select(election_data, -Lat.x, -Long.x, -Lat.y, -Long.y)
+
 #election_data <- left_join(election_data, separate_geo, by = "County")
-#election_data <- select(election_data, -Lat.x.x, -Long.x.x, -Lat.y.y, -Long.y.y)
+election_data <- election_data |>
+  na.omit()
+
+  
 ```
 

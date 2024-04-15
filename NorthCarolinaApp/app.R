@@ -2,6 +2,8 @@ library(shiny)
 library(leaflet)
 library(rjson)
 library(jsonlite)
+library(scales)
+library(RColorBrewer)
 
 # Define UI for application
 ui <- fluidPage(
@@ -34,21 +36,42 @@ election_data$Lat <- as.numeric(as.character(election_data$Lat))
 election_data$Long <- as.numeric(as.character(election_data$Long))
 # Define server logic 
 server <- function(input, output, session) {
-  geojson_data <- reactive ({
-    geojson <- readLines("data for app/nc_counties.geojson")
-    geojson <- paste(geojson, collapse = "")
-    fromJSON(geojson, flatten = TRUE)
+    geojson_data <- reactive({
+    geojson_stuff <- readLines("data for app/nc_counties.geojson")
+    geojson <- paste(geojson_stuff, collapse = "")
+    geojson <- jsonlite::fromJSON(geojson, flatten = TRUE)
+    if (!is.null(geojson) && !is.null(election_data)) {
+      geojson$features$properties$Votes_REP <- election_data$Votes_REP[match(geojson$features$properties$NAME, election_data$County)]
+    } else {
+      print("Geojson or election_data is null.")
+    }
+    geojson
+})
+  
+  scaling_fill <- reactive({
+    max_votes <- max(election_data$Votes_REP, na.rm = TRUE)
+    min_votes <- min(election_data$Votes_REP, na.rm = TRUE)
+    rescale(election_data$Votes_REP, to = c(0,1), from = c(min_votes, max_votes))
   })
+  
+  colors_scaled <- colorRampPalette(c("lightpink", "red"))
+  
   
   observe({
     updateSelectInput(session, "county", choices = election_data$County)
   })
   
   output$map <- renderLeaflet({
-    leaflet() |>
-      addTiles() |>
-      setView(lng = -79.0, lat = 35.5, zoom = 10) |>
-      addGeoJSON(geojson = geojson_data(), weight = 3, color = "black", fillColor = "blue")
+    if (is.null(geojson_data())) return(NULL)  # Prevent leaflet from rendering if geojson_data is NULL
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng = -79.0, lat = 35.5, zoom = 8) %>%
+      addGeoJSON(
+        geojson = geojson_data(),
+        weight = 3,
+        color = "black",
+        fillColor = ~colors_scaled(100)[as.integer(scaling_fill() * 100)]
+      )
   })
   
   observe({
