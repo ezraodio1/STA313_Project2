@@ -1,6 +1,13 @@
 ```{r}
+#| label: load packages
+
 library(tidyverse)
 library(readr)
+```
+
+
+```{r}
+#| label: data cleaning
 
 #2020
 file_path <- "data/2020.txt"
@@ -74,8 +81,9 @@ Election2004 <- read_delim(file_path, delim = ",")
 Election2004 <- Election2004 |>
   rename(`Total_Votes` = ballot_count, County = county, `Choice_Party` = party_cd) 
 
+head(Election2004)
 Election2004_Summary <- Election2004 |>
-  filter(contest_name == "US PRESIDENT") |>
+  filter(contest_name == "PRESIDENT") |>
   filter(Choice_Party %in% c("DEM", "REP")) |>
   group_by(County, Choice_Party) |>
   summarize(Total_Votes = sum(Total_Votes, na.rm = TRUE), .groups = 'drop') |>
@@ -106,21 +114,29 @@ election_data <- rbind(Election2000_Summary, Election2004_Summary, Election2008_
 ```
 
 ```{r}
-#reading in longitude and latitude data
+#| label: adding in geographical data and creating final dataframe
+
 geography_nc <- read_csv("data/NCCounties2.csv")
 separate_geo <- geography_nc |>
   separate(col = `Spreadsheet List of All counties in North Carolina.csv_exported`,
            into = c("County", "Lat", "Long"), sep = ",", convert = TRUE)
+#set values manually for Alamance because they are NAs in the original dataset
 separate_geo <- separate_geo |>
-  slice(-1) 
+  mutate(
+    Lat = if_else(County == "Alamance", "36.0117", Lat),  
+    Long = if_else(County == "Alamance", "-79.4254", Long)  
+  ) |>
+  #drop the one empty row
+  filter(County != "")
+separate_geo <- separate_geo |>
+   slice(-1) 
 separate_geo$County <- toupper(separate_geo$County)
-election_data2 <- left_join(election_data, separate_geo, by = "County")
-election_data2 <- select(election_data2, -Lat.x, -Long.x)
+#election_data_geo <- select(election_data_geo, -Lat, -Long)
 
 
 
 #reshaping total votes into dem and rep votes
-election_data3 <- election_data2 |>
+election_data_wide <- election_data |>
   pivot_wider(
     names_from = Choice_Party,
     values_from = Total_Votes,
@@ -128,7 +144,13 @@ election_data3 <- election_data2 |>
  ) |>
   replace_na(list(Votes_DEM = 0, Votes_REP = 0))
 
-write_csv(election_data3, "data/election-data3.csv")
+#adding in geographical data
+election_data_wide_geo <- left_join(election_data_wide, separate_geo, by = "County")
+```
 
+```{r}
+#| label: write csv file to data folder for app
+
+write_csv(election_data_wide_geo, "../../project-2-team_spring/NorthCarolinaApp/data for app/election-data-geo.csv")
 ```
 
