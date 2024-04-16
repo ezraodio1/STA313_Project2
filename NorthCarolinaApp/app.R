@@ -4,11 +4,16 @@ library(rjson)
 library(jsonlite)
 library(scales)
 library(RColorBrewer)
+library(readr)
+library(tidyverse)
 
+#Load Data
+election_data_combined <- read_csv("NorthCarolinaApp/data for app/election_data_wide_geo.csv")
+counties_geojson <- read_json("NorthCarolinaApp/data for app/nc_counties.geojson")
 
-# Load data --------------------------------------------------------------------
-election_data <- read.csv("data for app/election-data-geo.csv")
-
+#Change datatype to numeric
+election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
+election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
 
 # Define UI for application
 ui <- fluidPage(
@@ -16,18 +21,20 @@ ui <- fluidPage(
     # Application title
     titlePanel("North Carolina Election Data"),
     leafletOutput("map"),
-    
     sidebarLayout(
       sidebarPanel(
         selectInput("county", "Choose a County to View:",
-                    choices = election_data$County,
-                    selected = election_data$County[1]),
-        
+                    choices = election_data_combined$County,
+                    selected = election_data_combined$County[1]),
         sliderInput("year",
                     "Election Year:",
                     min = 2000,
                     max = 2024,
-                    value = 2020)
+                    value = 2020),
+    
+      selectInput("political", "Choose a Political Party: ",
+                  choices = election_data$Choice_Party,
+                  selected = election_data$Choice_Party[1])
       ),
 
         mainPanel(
@@ -36,66 +43,43 @@ ui <- fluidPage(
 )
 )
 
-#Change datatype to numeric
-election_data$Lat <- as.numeric(as.character(election_data$Lat))
-election_data$Long <- as.numeric(as.character(election_data$Long))
 # Define server logic 
 server <- function(input, output, session) {
-    geojson_data <- reactive({
-    geojson_stuff <- readLines("data for app/nc_counties.geojson")
-    geojson <- paste(geojson_stuff, collapse = "")
-    geojson <- jsonlite::fromJSON(geojson, flatten = TRUE)
-    if (!is.null(geojson) && !is.null(election_data)) {
-      geojson$features$properties$Votes_REP <- election_data$Votes_REP[match(geojson$features$properties$NAME, election_data$County)]
-    } else {
-      print("Geojson or election_data is null.")
-    }
-    geojson
-})
-  
-  scaling_fill <- reactive({
-    max_votes <- max(election_data$Votes_REP, na.rm = TRUE)
-    min_votes <- min(election_data$Votes_REP, na.rm = TRUE)
-    rescale(election_data$Votes_REP, to = c(0,1), from = c(min_votes, max_votes))
-  })
-  
-  colors_scaled <- colorRampPalette(c("lightpink", "red"))
-  
-  
-  observe({
-    updateSelectInput(session, "county", choices = election_data$County)
-  })
-  
+  #Base Map in the Beginning
   output$map <- renderLeaflet({
-    if (is.null(geojson_data())) return(NULL)  # Prevent leaflet from rendering if geojson_data is NULL
-    leaflet() %>%
-      addTiles() %>%
-      setView(lng = -79.0, lat = 35.5, zoom = 8) %>%
-      addGeoJSON(
-        geojson = geojson_data(),
-        weight = 3,
+    pal_colors <- colorQuantile("Purples", election_data_combined$Votes_REP, n = 5)
+    leaflet(data = counties_geojson) |>
+      addTiles() |>
+      addPolygons(
+        fillColor = ~pal_colors(Votes_REP),
+        fillOpacity = 0.5,
         color = "black",
-        fillColor = ~colors_scaled(100)[as.integer(scaling_fill() * 100)]
-      )
+        weight = 2,
+       popup = ~paste("Republican Votes: ", Votes_REP),
+        label = ~paste("Republican Votes: ", Votes_REP)
+      ) |>
+      setView(lng = -79.0, lat =35.5, zoom =7)
   })
-  
   observe({
-    print(input$county)
-    county_picked <- election_data[election_data$County == input$county, ]
-      
-    if(nrow(county_picked)> 0){
-    lat <- county_picked$Lat
-    long <- county_picked$Long
-    selected_feature <- geojson_data()$features[which(geojson_data()$features$properties$NAME == input$county)]
-    
-    
-    leafletProxy("map", session) |>
-      clearShapes() |>
-      addGeoJSON(geojson = selected_feature)
-    } else {
-    print ("No data found")
-  }
-})
+    req(election_data_combined) #checking if null
+    selected_county <- filter(election_data_combined, County == input$county)
+  
+  if(nrow(selected_county) > 0)
+  output$map <- renderLeaflet({
+    pal_colors <- colorNumeric("Purples", domain = election_data_combined$Votes_REP)
+    leaflet(data = selected_county) |>
+    addTiles() |> 
+      addCircleMarkers(
+        lng = ~Long,
+        lat = ~Lat,
+        radius = 8,
+        color = ~pal_colors(Votes_REP),
+        fillOpacity = 0.5,
+        popup = ~paste("Republican Votes: ", Votes_REP)
+      ) |>
+      setView(lng = selected_county$Long, lat = selected_county$Lat, zoom = 8)
+  })
+    })
 }
 # Run the application 
 shinyApp(ui = ui, server = server)

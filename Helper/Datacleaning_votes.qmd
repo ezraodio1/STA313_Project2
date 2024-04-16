@@ -133,8 +133,6 @@ separate_geo <- separate_geo |>
 separate_geo$County <- toupper(separate_geo$County)
 #election_data_geo <- select(election_data_geo, -Lat, -Long)
 
-
-
 #reshaping total votes into dem and rep votes
 election_data_wide <- election_data |>
   pivot_wider(
@@ -146,11 +144,15 @@ election_data_wide <- election_data |>
 
 #adding in geographical data
 election_data_wide_geo <- left_join(election_data_wide, separate_geo, by = "County")
+
+#adding in shape data for polygons
+polygon_nc <- read_csv("NCDOT_County_Boundaries.csv")
+
 ```
 
 ```{r}
 #| label: write csv file to data folder for app
-
+write_csv(election_data_wide_geo, "../../project-2-team_spring/NorthCarolinaApp/data for app/election_data_wide_geo.csv")
 write_csv(election_data_wide_geo, "../../project-2-team_spring/NorthCarolinaApp/data for app/election-data-geo.csv")
 ```
 
