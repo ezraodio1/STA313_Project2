@@ -146,7 +146,7 @@ election_data_wide <- election_data |>
 election_data_wide_geo <- left_join(election_data_wide, separate_geo, by = "County")
 
 #adding in shape data for polygons
-polygon_nc <- read_csv("NCDOT_County_Boundaries.csv")
+#polygon_nc <- read_csv("NCDOT_County_Boundaries.csv")
 
 ```
 

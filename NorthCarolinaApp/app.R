@@ -6,10 +6,15 @@ library(scales)
 library(RColorBrewer)
 library(readr)
 library(tidyverse)
+library(sf)
+
 
 #Load Data
-election_data_combined <- read_csv("NorthCarolinaApp/data for app/election_data_wide_geo.csv")
-counties_geojson <- read_json("NorthCarolinaApp/data for app/nc_counties.geojson")
+election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
+counties_geo <- st_read("data for app/nc_counties.geojson")
+
+counties_geo <- counties_geo |>
+mutate(County = str_to_upper(County))
 
 #Change datatype to numeric
 election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
@@ -33,8 +38,8 @@ ui <- fluidPage(
                     value = 2020),
     
       selectInput("political", "Choose a Political Party: ",
-                  choices = election_data$Choice_Party,
-                  selected = election_data$Choice_Party[1])
+                  choices = c("Rep" = "Rep", "Dem" = "Dem"),
+                  selected = "Rep")
       ),
 
         mainPanel(
@@ -43,43 +48,52 @@ ui <- fluidPage(
 )
 )
 
-# Define server logic 
+
 server <- function(input, output, session) {
+  picking_political <- reactive({
+    if (input$political == "Rep") {
+      votes <- election_data_combined$Votes_REP
+      domain <- na.omit(votes)
+      if (length(domain) == 0) domain <- c(0, 1)  
+      list(votes = votes, palette = colorQuantile("Reds", domain, n = 5))
+    } else {
+      votes <- election_data_combined$Votes_DEM
+      domain <- na.omit(votes)
+      if (length(domain) == 0) domain <- c(0, 1) 
+      list(votes = votes, palette = colorQuantile("Blues", domain, n = 5))
+    }
+  })
+  
   #Base Map in the Beginning
   output$map <- renderLeaflet({
-    pal_colors <- colorQuantile("Purples", election_data_combined$Votes_REP, n = 5)
-    leaflet(data = counties_geojson) |>
+    #matching counties for dem and rep
+    matched_index <- match(counties_geo$County, election_data_combined$County)
+    matched_numbervotes <- picking_political()$votes[matched_index]
+    
+    leaflet(data = counties_geo) |>
       addTiles() |>
       addPolygons(
-        fillColor = ~pal_colors(Votes_REP),
-        fillOpacity = 0.5,
+        fillColor = ~picking_political()$palette(matched_numbervotes),
+        fillOpacity = 0.8,
         color = "black",
         weight = 2,
-       popup = ~paste("Republican Votes: ", Votes_REP),
-        label = ~paste("Republican Votes: ", Votes_REP)
+       popup = ~paste(County, "<br>", input$political, "Votes: ", matched_numbervotes)
       ) |>
       setView(lng = -79.0, lat =35.5, zoom =7)
   })
-  observe({
-    req(election_data_combined) #checking if null
-    selected_county <- filter(election_data_combined, County == input$county)
   
-  if(nrow(selected_county) > 0)
-  output$map <- renderLeaflet({
-    pal_colors <- colorNumeric("Purples", domain = election_data_combined$Votes_REP)
-    leaflet(data = selected_county) |>
-    addTiles() |> 
-      addCircleMarkers(
-        lng = ~Long,
-        lat = ~Lat,
-        radius = 8,
-        color = ~pal_colors(Votes_REP),
-        fillOpacity = 0.5,
-        popup = ~paste("Republican Votes: ", Votes_REP)
-      ) |>
-      setView(lng = selected_county$Long, lat = selected_county$Lat, zoom = 8)
-  })
-    })
+  #observe({
+  #  selected_county <- counties_geo[counties_geo$County == input$county]
+  #  county_centroid <- st_centroid(st_geometry(selected_county))
+    
+    # Pulling the long/lat
+  #  lng <- st_coordinates(county_centroid)[1, 1]
+  #  lat <- st_coordinates(county_centroid)[1, 2]
+    
+    # Use leafletProxy to update the existing leaflet map
+  #  leafletProxy("map", data = selected_county) %>%
+  #   setView(lng = lng, lat = lat, zoom = 10)
+#})
 }
 # Run the application 
 shinyApp(ui = ui, server = server)

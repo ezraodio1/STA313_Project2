@@ -8,7 +8,10 @@ library(scales)
 library(RColorBrewer)
 library(readr)
 library(tidyverse)
+library(sf)
+library(dplyr)
 ```
+
 
 ```{r}
 election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
@@ -22,10 +25,19 @@ election_data_combined$Long <- as.numeric(as.character(election_data_combined$Lo
 
 
 ```{r}
-    selected_county <- filter(election_data_combined, County == "MECKLENBURG")
-    pal_colors <- colorNumeric("Purples", domain = election_data_combined$Votes_REP)
+#shape file for counties      
+nc <- st_read(system.file("shape/nc.shp", package="sf"))
+#combining election data with shape file
+nc <- nc |>
+rename(County = NAME) |>
+  mutate(County = str_to_upper(County)) 
 
-  map <- leaflet(data = selected_county) |>
+election_data_combined2 <- left_join(election_data_combined, nc, by = "County")
+#selecting county
+selected_county <- filter(election_data_combined2, County == "MECKLENBURG")
+    pal_colors <- colorNumeric("Purples", domain = election_data_combined$Votes_REP)
+    
+    map <- sf(data = selected_county) |>
         addTiles() |> 
         addPolygons(
         fillColor = ~pal_colors(Votes_REP),
