@@ -39,8 +39,13 @@ ui <- fluidPage(
     
       selectInput("political", "Choose a Political Party: ",
                   choices = c("Rep" = "Rep", "Dem" = "Dem"),
-                  selected = "Rep")
+                  selected = "Rep"),
+      selectInput("year",
+                  "Election Year:",
+                  choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
+                  selected = "2020")
       ),
+      
 
         mainPanel(
            plotOutput("distPlot") #Placeholder, not actually using a histogram
@@ -51,35 +56,45 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   picking_political <- reactive({
+    election_data_for_year <- election_data_combined |>
+      filter(Year == as.numeric(input$year))
+    
     if (input$political == "Rep") {
-      votes <- election_data_combined$Votes_REP
-      domain <- na.omit(votes)
-      if (length(domain) == 0) domain <- c(0, 1)  
-      list(votes = votes, palette = colorQuantile("Reds", domain, n = 5))
+      election_data_for_year <- election_data_for_year |>
+        select(County, Votes_REP)
+      names(election_data_for_year)[names(election_data_for_year) == "Votes_REP"] <- "Votes"
     } else {
-      votes <- election_data_combined$Votes_DEM
-      domain <- na.omit(votes)
-      if (length(domain) == 0) domain <- c(0, 1) 
-      list(votes = votes, palette = colorQuantile("Blues", domain, n = 5))
+      election_data_for_year <- election_data_for_year |>
+        select(County, Votes_DEM)
+      names(election_data_for_year)[names(election_data_for_year) == "Votes_DEM"] <- "Votes"
     }
+    
+    election_data_for_year
   })
   
-  #Base Map in the Beginning
   output$map <- renderLeaflet({
-    #matching counties for dem and rep
-    matched_index <- match(counties_geo$County, election_data_combined$County)
-    matched_numbervotes <- picking_political()$votes[matched_index]
-    
     leaflet(data = counties_geo) |>
       addTiles() |>
+      setView(lng = -79.0, lat =35.5, zoom = 7)
+  })
+  
+  observe({
+    df <- picking_political()
+    
+    matched_index <- match(counties_geo$County, df$County)
+    matched_votes <- df$Votes[matched_index]
+    
+    palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues", na.omit(matched_votes), n = 5)
+    
+    leafletProxy("map", data = counties_geo) |>
+      clearShapes() |>
       addPolygons(
-        fillColor = ~picking_political()$palette(matched_numbervotes),
+        fillColor = ~palette(matched_votes),
         fillOpacity = 0.8,
-        color = "black",
-        weight = 2,
-       popup = ~paste(County, "<br>", input$political, "Votes: ", matched_numbervotes)
-      ) |>
-      setView(lng = -79.0, lat =35.5, zoom =7)
+        color = "#2B2B2B",
+        weight = 1,
+        popup = ~paste(County, "<br>", input$political, "Votes: ", matched_votes)
+      )
   })
   
   #observe({
