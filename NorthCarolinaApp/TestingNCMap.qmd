@@ -15,7 +15,7 @@ library(dplyr)
 
 ```{r}
 election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
-election_data_combined <- election_data_wide_geo
+#election_data_combined <- election_data_wide_geo
 
 #change data type to numeric
 election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
@@ -48,7 +48,7 @@ selected_county <- filter(election_data_combined2, County == "MECKLENBURG")
         label = ~paste("Republican Votes: ", Votes_REP)
       ) |>
       setView(lng = selected_county$Long, lat = selected_county$Lat, zoom = 8)
-  )
+  
   
   map
 ```

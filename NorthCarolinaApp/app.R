@@ -80,26 +80,26 @@ server <- function(input, output, session) {
   })
   
   observe({
-      df <- picking_political()
-      
-      matched_index <- match(counties_geo$County, df$County)
-      matched_votes <- df$Votes[matched_index]
-      selected_county <- input$county
-      
-      palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues", na.omit(matched_votes), n = 5)
-      
-      leafletProxy("map", data = counties_geo) |>
-        clearShapes() |>
-        addPolygons(
-          fillColor = ~palette(matched_votes),
-          fillOpacity = ~ifelse(County == selected_county, 1, 0.5),
-          color = ~ifelse(County == selected_county, "black", "gray"),
-          opacity = 1,
-          smoothFactor = 0,
-          weight = ~ifelse(County == selected_county, 3, 1),
-          popup = ~paste(County, "<br>", input$political, "Votes: ", matched_votes)
-        )
-    })
+    df <- picking_political()
+    
+    matched_index <- match(counties_geo$County, df$County)
+    matched_votes <- df$Votes[matched_index]
+    selected_county <- input$county
+    
+    palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues", na.omit(matched_votes), n = 5)
+    
+    leafletProxy("map", data = counties_geo) |>
+      clearShapes() |>
+      addPolygons(
+        fillColor = ~palette(matched_votes),
+        fillOpacity = ~ifelse(County == selected_county, 1, 0.5),
+        color = ~ifelse(County == selected_county, "black", "gray"),
+        opacity = 1,
+        smoothFactor = 0,
+        weight = ~ifelse(County == selected_county, 3, 1),
+        popup = ~paste(County, "<br>", input$political, "Votes: ", matched_votes)
+      )
+  })
   
   #observe({
   #  selected_county <- counties_geo[counties_geo$County == input$county]
