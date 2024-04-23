@@ -12,17 +12,15 @@ library(sf)
 
 # load data --------------------------------------------------------------------
 
-election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
-counties_geo <- st_read("data for app/nc_counties.geojson")
+election_data_combined <- read_csv("data/election_data_wide_geo.csv")
+counties_geo <- st_read("data/nc_counties.geojson")
 
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
 
-election_data_combined
-
-# Change datatype to numeric
-election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
-election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
+# Change datatype to numeric - MCR: PROBABLY DON'T NEED
+# election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
+# election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
 
 # UI ---------------------------------------------------------------------------
 
@@ -30,7 +28,6 @@ ui <- fluidPage(
 
   # Application title
   titlePanel("North Carolina Election Data"),
-  leafletOutput("map"),
   sidebarLayout(
     sidebarPanel(
       selectInput("county", "Choose a County to View:",
@@ -41,10 +38,12 @@ ui <- fluidPage(
         "Election Year:",
         choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
         selected = "2020"
-      )
+      ),
+      width = 3
     ),
     mainPanel(
-      plotOutput("distPlot") # Placeholder, not actually using a histogram
+      leafletOutput("map"),
+      width = 9
     )
   )
 )
