@@ -16,6 +16,8 @@ counties_geo <- st_read("data for app/nc_counties.geojson")
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
 
+election_data_combined 
+
 #Change datatype to numeric
 election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
 election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
@@ -31,13 +33,6 @@ ui <- fluidPage(
       selectInput("county", "Choose a County to View:",
                   choices = c("None" = "", election_data_combined$County),
                   selected = ""),
-      #EZRA: Got rid of slider - it seemed redundant
-      # sliderInput("year",
-      #             "Election Year:",
-      #             min = 2000,
-      #             max = 2024,
-      #             value = 2020),
-      
       selectInput("political", "Choose a Political Party: ",
                   choices = c("Rep" = "Rep", "Dem" = "Dem"),
                   selected = "Rep"),
@@ -100,19 +95,6 @@ server <- function(input, output, session) {
         popup = ~paste(County, "<br>", input$political, "Votes: ", matched_votes)
       )
   })
-  
-  #observe({
-  #  selected_county <- counties_geo[counties_geo$County == input$county]
-  #  county_centroid <- st_centroid(st_geometry(selected_county))
-  
-  # Pulling the long/lat
-  #  lng <- st_coordinates(county_centroid)[1, 1]
-  #  lat <- st_coordinates(county_centroid)[1, 2]
-  
-  # Use leafletProxy to update the existing leaflet map
-  #  leafletProxy("map", data = selected_county) %>%
-  #   setView(lng = lng, lat = lat, zoom = 10)
-  #})
 }
 # Run the application 
 shinyApp(ui = ui, server = server)

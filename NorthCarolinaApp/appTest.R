@@ -120,7 +120,7 @@ server <- function(input, output, session) {
     
     election_data_for_year
   })
-
+  
   
   observe({
     df <- picking_political()
@@ -143,53 +143,53 @@ server <- function(input, output, session) {
         popup = ~paste(County, "<br>", input$political, "Votes: ", matched_votes_election)
       )
   })
-
-
-ACS_filtered <- reactive({
-  ACS_year <- ACS |>
-    filter(Year == as.numeric(input$Year))
   
-  if (input$Sex != "All") {
-    ACS_year <- ACS_year |>
-      filter(Sex == input$Sex)
-  }
   
-  if (input$Race != "All") {
-    ACS_year <- ACS_year |>
-      filter(Race == input$Race)
-  }
+  ACS_filtered <- reactive({
+    ACS_year <- ACS |>
+      filter(Year == as.numeric(input$Year))
+    
+    if (input$Sex != "All") {
+      ACS_year <- ACS_year |>
+        filter(Sex == input$Sex)
+    }
+    
+    if (input$Race != "All") {
+      ACS_year <- ACS_year |>
+        filter(Race == input$Race)
+    }
+    
+    if (input$Age_Category != "All") {
+      ACS_year <- ACS_year |>
+        filter(Age_Category == input$Age_Category)
+    }
+    
+    ACS_year
+  })
   
-  if (input$Age_Category != "All") {
-    ACS_year <- ACS_year |>
-      filter(Age_Category == input$Age_Category)
-  }
   
-  ACS_year
-})
-
-
-observe({
-  df <- ACS_filtered()
+  observe({
+    df <- ACS_filtered()
+    
+    matched_index_ACS <- match(counties_geo$County, df$County)
+    matched_votes_ACS <- df$Votes[matched_index_ACS]
+    selected_county_ACS <- input$ACScounty
+    
+    palette1 <- colorQuantile("Blues", na.omit(df$Count), n = 5)
+    
+    leafletProxy("map2", data = counties_geo) |>
+      clearShapes() |>
+      addPolygons(
+        fillColor = ~palette(Count),
+        fillOpacity = ~ifelse(County == selected_county_ACS, 1, 0.5),
+        color = ~ifelse(County == selected_county_ACS, "black", "gray"),
+        opacity = 1,
+        smoothFactor = 0,
+        weight = ~ifelse(County == selected_county_ACS, 3, 1),
+        popup = ~paste(County, "<br>", "Population: ", Count)
+      )
+  })
   
-  matched_index_ACS <- match(counties_geo$County, df$County)
-  matched_votes_ACS <- df$Votes[matched_index_ACS]
-  selected_county_ACS <- input$ACScounty
-  
-  palette1 <- colorQuantile("Blues", na.omit(df$Count), n = 5)
-  
-  leafletProxy("map2", data = counties_geo) |>
-    clearShapes() |>
-    addPolygons(
-      fillColor = ~palette(Count),
-      fillOpacity = ~ifelse(County == selected_county_ACS, 1, 0.5),
-      color = ~ifelse(County == selected_county_ACS, "black", "gray"),
-      opacity = 1,
-      smoothFactor = 0,
-      weight = ~ifelse(County == selected_county_ACS, 3, 1),
-      popup = ~paste(County, "<br>", "Population: ", Count)
-    )
-})
-
 }
 
 shinyApp(ui = ui, server = server)
