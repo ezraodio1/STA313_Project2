@@ -155,14 +155,25 @@ population2004$County <- toupper(population2004$County)
 population2008 <- read_csv("data/County_totals2008.csv")
 population2008$County <- toupper(population2008$County)
 
-#election_data_wide_geo <- left_join(election_data_wide_geo, population2000, by = c("County", "Year"))
-#election_data_wide_geo <- left_join(election_data_wide_geo, population2004, by = c("County", "Year", "Population"))
-#election_data_wide_geo <- left_join(election_data_wide_geo, population2008, by = c("County", "Year", "Population"))
+population2012 <- read_csv("data/County_totals2012.csv")
+population2012$County <- toupper(population2012$County)
 
-#election_data_wide_geo |>
-#  select(-population.x) |>
-# select(-population.y) |>
-#  select(-population)
+population2016 <- read_csv("data/County_totals2016.csv")
+population2016$County <- toupper(population2016$County)
+
+population2020 <- read_csv("data/County_totals2020.csv")
+population2020$County <- toupper(population2020$County)
+
+
+combined_population <- bind_rows(population2000, population2004, population2008, population2012, population2016, population2020)
+
+#adding all year's population data to election_data
+
+election_data_wide_geo <- left_join(election_data_wide_geo, combined_population, by = c("County", "Year"))
+
+election_data_wide_geo <- election_data_wide_geo |>
+  mutate(dem_per_capita = Votes_DEM / Population) |>
+  mutate(rep_per_capita = Votes_REP / Population)
 
 #adding in shape data for polygons
 #polygon_nc <- read_csv("NCDOT_County_Boundaries.csv")
