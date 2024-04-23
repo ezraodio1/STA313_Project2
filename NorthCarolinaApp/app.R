@@ -1,3 +1,5 @@
+# load packages ----------------------------------------------------------------
+
 library(shiny)
 library(leaflet)
 library(rjson)
@@ -8,8 +10,8 @@ library(readr)
 library(tidyverse)
 library(sf)
 
+# load data --------------------------------------------------------------------
 
-#Load Data
 election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
 counties_geo <- st_read("data for app/nc_counties.geojson")
 
@@ -18,11 +20,12 @@ counties_geo <- counties_geo |>
 
 election_data_combined 
 
-#Change datatype to numeric
+# Change datatype to numeric
 election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
 election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
 
-# Define UI for application
+# UI ---------------------------------------------------------------------------
+
 ui <- fluidPage(
   
   # Application title
@@ -46,6 +49,7 @@ ui <- fluidPage(
   )
 )
 
+# server -----------------------------------------------------------------------
 
 server <- function(input, output, session) {
  
@@ -71,8 +75,8 @@ server <- function(input, output, session) {
     matched_votes_rep <- df$Votes_REP[matched_index]
     matched_votes_dem <- df$Votes_DEM[matched_index]
     
-    #Colorblind friendly colors: https://davidmathlogic.com/colorblind/#%23D81B60-%231E88E5-%23FFC107-%23004D40
-    #Do we need to make this colorblind friendly? Hard to see the difference between red and blue if so
+    # Colorblind friendly colors: https://davidmathlogic.com/colorblind/#%23D81B60-%231E88E5-%23FFC107-%23004D40
+    # Do we need to make this colorblind friendly? Hard to see the difference between red and blue if so
     
     palette <- colorNumeric(c("red", "white", "blue"), domain = range(matched_political, na.rm = TRUE))
     leafletProxy("map", data = counties_geo) |>
@@ -103,5 +107,7 @@ server <- function(input, output, session) {
   })
   
 }
-# Run the application 
+
+# run app ----------------------------------------------------------------------
+
 shinyApp(ui = ui, server = server)
