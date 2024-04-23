@@ -71,12 +71,15 @@ server <- function(input, output, session) {
     matched_votes_rep <- df$Votes_REP[matched_index]
     matched_votes_dem <- df$Votes_DEM[matched_index]
     
-    palette <- colorNumeric(c("red", "blue"), domain = range(matched_political, na.rm = TRUE))
+    #Colorblind friendly colors: https://davidmathlogic.com/colorblind/#%23D81B60-%231E88E5-%23FFC107-%23004D40
+    #Do we need to make this colorblind friendly? Hard to see the difference between red and blue if so
+    
+    palette <- colorNumeric(c("red", "white", "blue"), domain = range(matched_political, na.rm = TRUE))
     leafletProxy("map", data = counties_geo) |>
       clearShapes() |>
       addPolygons(
         fillColor = ~palette(matched_political),
-        fillOpacity = ~ifelse(County == selected_county, 1, 0.7),
+        fillOpacity = ~ifelse(County == selected_county, 1, 0.5),
         color = ~ifelse(County == selected_county, "black", "gray"),
         opacity = 1,
         smoothFactor = 0,
@@ -86,6 +89,19 @@ server <- function(input, output, session) {
                        "Democrat Votes: ", matched_votes_dem, "<br>")
       )
   })
+  
+  observe({
+    df <- combining_rep_dem()
+    matched_political <- df$politicalparty
+    
+    palette <- colorNumeric(c("red", "white", "blue"), domain = range(matched_political, na.rm = TRUE))
+    leafletProxy("map", data = counties_geo) |>
+      
+      addLegend("bottomright", pal = palette, values = ~matched_political,
+                title = "Republican to Democrat Scale Per Capita",
+                opacity = 0.7)  
+  })
+  
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
