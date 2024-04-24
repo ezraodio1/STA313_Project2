@@ -10,18 +10,18 @@ library(sf)
 
 
 #Load Data
-election_data_combined <- read_csv("data for app/election_data_wide_geo.csv")
-counties_geo <- st_read("data for app/nc_counties.geojson")
+election_data_combined <- read_csv("data/election_data_wide_geo.csv")
+counties_geo <- st_read("data/nc_counties.geojson")
 
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
 
-ACS2000_cleaned <- read_csv("data for app/ACS2000_cleaned.csv")
-ACS2004_cleaned <- read_csv("data for app/ACS2004_cleaned.csv")
-ACS2008_cleaned <- read_csv("data for app/ACS2008_cleaned.csv")
-ACS2012_cleaned <- read_csv("data for app/ACS2012_cleaned.csv")
-ACS2016_cleaned <- read_csv("data for app/ACS2016_cleaned.csv")
-ACS2020_cleaned <- read_csv("data for app/ACS2020_cleaned.csv")
+ACS2000_cleaned <- read_csv("data/ACS2000_cleaned.csv")
+ACS2004_cleaned <- read_csv("data/ACS2004_cleaned.csv")
+ACS2008_cleaned <- read_csv("data/ACS2008_cleaned.csv")
+ACS2012_cleaned <- read_csv("data/ACS2012_cleaned.csv")
+ACS2016_cleaned <- read_csv("data/ACS2016_cleaned.csv")
+ACS2020_cleaned <- read_csv("data/ACS2020_cleaned.csv")
 
 ACS_all <- rbind(ACS2000_cleaned, 
                  ACS2004_cleaned,
@@ -55,17 +55,15 @@ ACS$Long <- as.numeric(as.character(ACS$Long))
 # Define UI for application
 ui <- fluidPage(
   
-  # Application title
   titlePanel("North Carolina Election Data"),
-  leafletOutput("map1"),
-  leafletOutput("map2"),
+  
   sidebarLayout(
     sidebarPanel(
       h4("Election Filters"),
       selectInput("electioncounty", "Choose a County to View:",
-                  choices = c("None" = "", election_data_combined$County),
+                  choices = c("None" = "", sort(unique(election_data_combined$County))),
                   selected = ""),
-      selectInput("political", "Choose a Political Party: ",
+      selectInput("political", "Choose a Political Party:",
                   choices = c("Rep" = "Rep", "Dem" = "Dem"),
                   selected = "Rep"),
       selectInput("year",
@@ -75,17 +73,16 @@ ui <- fluidPage(
       hr(),
       h4("ACS Filters"),
       selectInput("ACScounty", "Choose a County to View:",
-                  choices = c("None" = "", ACS$County),
+                  choices = c("None" = "", sort(unique(ACS$County))),
                   selected = ""),
       selectInput("Sex", "Sex:", choices = c("All", sort(unique(ACS$Sex)))),
       selectInput("Race", "Race:", choices = c("All", sort(unique(ACS$Race)))),
       selectInput("Age_Category", "Age Category:", choices = c("All", sort(unique(ACS$Age_Category))))
     ),
     
-    
     mainPanel(
-      plotOutput("electiondist"),
-      plotOutput("ACSdist")
+      leafletOutput("map1"),
+      leafletOutput("map2")
     )
   )
 )
@@ -95,18 +92,20 @@ server <- function(input, output, session) {
   output$map1 <- renderLeaflet({
     leaflet(data = counties_geo) |>
       addTiles() |>
-      setView(lng = -79.0, lat =35.5, zoom = 7)
+      setView(lng = -79.0, lat = 35.5, zoom = 7)
   })
   
+  # Map 2: ACS Data
   output$map2 <- renderLeaflet({
     leaflet(data = counties_geo) |>
       addTiles() |>
-      setView(lng = -79.0, lat =35.5, zoom = 7)
+      setView(lng = -79.0, lat = 35.5, zoom = 7)
   })
   
   picking_political <- reactive({
     election_data_for_year <- election_data_combined |>
-      filter(Year == as.numeric(input$year))
+      filter(Year == as.numeric(input$year)) |>
+      mutate(Votes = if_else(input$political == "Rep", Votes_REP, Votes_DEM))
     
     if (input$political == "Rep") {
       election_data_for_year <- election_data_for_year |>
@@ -126,7 +125,7 @@ server <- function(input, output, session) {
     df <- picking_political()
     
     matched_index_election <- match(counties_geo$County, df$County)
-    matched_votes_election <- df$Votes[matched_index]
+    matched_votes_election <- df$Votes[matched_index_election]
     selected_county_election <- input$electioncounty
     
     palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues", na.omit(matched_votes_election), n = 5)
@@ -147,7 +146,7 @@ server <- function(input, output, session) {
   
   ACS_filtered <- reactive({
     ACS_year <- ACS |>
-      filter(Year == as.numeric(input$Year))
+      filter(Year == as.numeric(input$year))
     
     if (input$Sex != "All") {
       ACS_year <- ACS_year |>
@@ -180,7 +179,7 @@ server <- function(input, output, session) {
     leafletProxy("map2", data = counties_geo) |>
       clearShapes() |>
       addPolygons(
-        fillColor = ~palette(Count),
+        fillColor = ~palette1(df$Count[matched_index_ACS]),
         fillOpacity = ~ifelse(County == selected_county_ACS, 1, 0.5),
         color = ~ifelse(County == selected_county_ACS, "black", "gray"),
         opacity = 1,
