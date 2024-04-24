@@ -10,18 +10,18 @@ library(sf)
 
 
 #Load Data
-election_data_combined <- read_csv("data/election_data_wide_geo.csv")
+election_data_combined <- read_csv("data/election_data_wide_geo.csv", show_col_types = FALSE)
 counties_geo <- st_read("data/nc_counties.geojson")
 
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
 
-ACS2000_cleaned <- read_csv("data/ACS2000_cleaned.csv")
-ACS2004_cleaned <- read_csv("data/ACS2004_cleaned.csv")
-ACS2008_cleaned <- read_csv("data/ACS2008_cleaned.csv")
-ACS2012_cleaned <- read_csv("data/ACS2012_cleaned.csv")
-ACS2016_cleaned <- read_csv("data/ACS2016_cleaned.csv")
-ACS2020_cleaned <- read_csv("data/ACS2020_cleaned.csv")
+ACS2000_cleaned <- read_csv("data/ACS2000_cleaned.csv", show_col_types = FALSE)
+ACS2004_cleaned <- read_csv("data/ACS2004_cleaned.csv", show_col_types = FALSE)
+ACS2008_cleaned <- read_csv("data/ACS2008_cleaned.csv", show_col_types = FALSE)
+ACS2012_cleaned <- read_csv("data/ACS2012_cleaned.csv", show_col_types = FALSE)
+ACS2016_cleaned <- read_csv("data/ACS2016_cleaned.csv", show_col_types = FALSE)
+ACS2020_cleaned <- read_csv("data/ACS2020_cleaned.csv", show_col_types = FALSE)
 
 ACS_all <- rbind(ACS2000_cleaned, 
                  ACS2004_cleaned,
@@ -44,6 +44,7 @@ ACS_all_pivot <- pivot_longer(
 
 ACS <- ACS_all_pivot |>
   select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count)
+
 
 #Change datatype to numeric
 election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
@@ -89,6 +90,7 @@ ui <- fluidPage(
 
 
 server <- function(input, output, session) {
+  
   output$map1 <- renderLeaflet({
     leaflet(data = counties_geo) |>
       addTiles() |>
@@ -104,8 +106,7 @@ server <- function(input, output, session) {
   
   picking_political <- reactive({
     election_data_for_year <- election_data_combined |>
-      filter(Year == as.numeric(input$year)) |>
-      mutate(Votes = if_else(input$political == "Rep", Votes_REP, Votes_DEM))
+      filter(Year == as.numeric(input$year))
     
     if (input$political == "Rep") {
       election_data_for_year <- election_data_for_year |>
@@ -123,6 +124,7 @@ server <- function(input, output, session) {
   
   observe({
     df <- picking_political()
+    
     
     matched_index_election <- match(counties_geo$County, df$County)
     matched_votes_election <- df$Votes[matched_index_election]
@@ -185,7 +187,7 @@ server <- function(input, output, session) {
         opacity = 1,
         smoothFactor = 0,
         weight = ~ifelse(County == selected_county_ACS, 3, 1),
-        popup = ~paste(County, "<br>", "Population: ", Count)
+        #popup = ~paste(County, "<br>", "Population: ", Count)
       )
   })
   
