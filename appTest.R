@@ -54,7 +54,7 @@ ACS$Long <- as.numeric(as.character(ACS$Long))
 
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
-  titlePanel("North Carolina Election Data"),
+  #titlePanel("North Carolina Election Data"),
   sidebarLayout(
     sidebarPanel(
       h4("Election Filters"),
@@ -84,8 +84,11 @@ ui <- fluidPage(
       )
     ),
     mainPanel(
-      leafletOutput("map_election"),
-      leafletOutput("map2")
+      h4("Election Data Map", style = "text-align: center;"),
+      leafletOutput("map_election", height = "350px"),
+      #div(style = "margin-top: 20px;"),
+      h4("ACS Data Map", style = "text-align: center;"),
+      leafletOutput("map_ACS", height = "350px")
     )
   )
 )
@@ -178,7 +181,7 @@ server <- function(input, output, session) {
   })
 
   # MAP 2: ACS Data ------------------------------------------------------------
-  output$map2 <- renderLeaflet({
+  output$map_ACS <- renderLeaflet({
     leaflet(data = counties_geo) |>
       addTiles() |>
       setView(lng = -79.0, lat = 35.5, zoom = 7)
@@ -204,34 +207,34 @@ server <- function(input, output, session) {
   })
 
 
-  observe({
-    df <- picking_political()
-
-
-    matched_index_election <- match(counties_geo$County, df$County)
-    matched_votes_election <- df$Votes[matched_index_election]
-    selected_county_election <- input$electionCounty
-
-    palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues",
-      na.omit(matched_votes_election),
-      n = 5
-    )
-
-    leafletProxy("map1", data = counties_geo) |>
-      clearShapes() |>
-      addPolygons(
-        fillColor = ~ palette(matched_votes_election),
-        fillOpacity = ~ ifelse(County == selected_county_election, 1, 0.5),
-        color = ~ ifelse(County == selected_county_election, "black", "gray"),
-        opacity = 1,
-        smoothFactor = 0,
-        weight = ~ ifelse(County == selected_county_election, 3, 1),
-        popup = ~ paste(
-          County, "<br>", input$political, "Votes: ",
-          matched_votes_election
-        )
-      )
-  })
+  # observe({
+  #   df <- picking_political()
+  # 
+  # 
+  #   matched_index_election <- match(counties_geo$County, df$County)
+  #   matched_votes_election <- df$Votes[matched_index_election]
+  #   selected_county_election <- input$electionCounty
+  # 
+  #   palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues",
+  #     na.omit(matched_votes_election),
+  #     n = 5
+  #   )
+  # 
+  #   leafletProxy("map1", data = counties_geo) |>
+  #     clearShapes() |>
+  #     addPolygons(
+  #       fillColor = ~ palette(matched_votes_election),
+  #       fillOpacity = ~ ifelse(County == selected_county_election, 1, 0.5),
+  #       color = ~ ifelse(County == selected_county_election, "black", "gray"),
+  #       opacity = 1,
+  #       smoothFactor = 0,
+  #       weight = ~ ifelse(County == selected_county_election, 3, 1),
+  #       popup = ~ paste(
+  #         County, "<br>", input$political, "Votes: ",
+  #         matched_votes_election
+  #       )
+  #     )
+  # })
 
 
   ACS_filtered <- reactive({
@@ -266,7 +269,7 @@ server <- function(input, output, session) {
 
     palette1 <- colorQuantile("Blues", na.omit(df$Count), n = 5)
 
-    leafletProxy("map2", data = counties_geo) |>
+    leafletProxy("map_ACS", data = counties_geo) |>
       clearShapes() |>
       addPolygons(
         fillColor = ~ palette1(df$Count[matched_index_ACS]),
