@@ -49,11 +49,6 @@ ACS_all_pivot <- pivot_longer(
 ACS <- ACS_all_pivot |>
   select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count)
 
-
-# Change datatype to numeric
-# election_data_combined$Lat <- as.numeric(as.character(election_data_combined$Lat))
-# election_data_combined$Long <- as.numeric(as.character(election_data_combined$Long))
-
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
 
