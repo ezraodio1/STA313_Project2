@@ -25,7 +25,7 @@ counties_geo <- st_read("data/nc_counties.geojson")
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
 
-election_data_combined <- election_data_combined %>%
+election_data_combined <- election_data_combined |>
   mutate(County = str_to_upper(County))
 
 
@@ -98,10 +98,10 @@ server <- function(input, output, session) {
     # Ensure selections are valid before proceeding
     if (!is.null(old_selection) && old_selection != "" && any(combined_data()$County == old_selection)) {
       # Reset the previously selected county to its original state
-      leafletProxy("map_election") %>%
-        removeShape(layerId = old_selection) %>%
+      leafletProxy("map_election") |>
+        removeShape(layerId = old_selection) |>
         addPolygons(
-          data = combined_data() %>% filter(County == old_selection),
+          data = combined_data() |> filter(County == old_selection),
           fillColor = ~palette(politicalparty),
           fillOpacity = 0.5,
           color = "gray",
@@ -117,9 +117,9 @@ server <- function(input, output, session) {
     
     if (new_selection != "" && any(combined_data()$County == new_selection)) {
       # Apply new highlight to the selected county
-      leafletProxy("map_election") %>%
+      leafletProxy("map_election") |>
         addPolygons(
-          data = combined_data() %>% filter(County == new_selection),
+          data = combined_data() |> filter(County == new_selection),
           fillColor = "green",
           fillOpacity = 1,
           color = "black",
