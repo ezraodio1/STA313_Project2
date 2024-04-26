@@ -9,7 +9,7 @@ library(tidyverse)
 library(sf)
 
 
-#Load Data
+#Load Data ---------------------------------------------------------------------
 election_data_combined <- read_csv("data/election_data_wide_geo.csv", show_col_types = FALSE)
 counties_geo <- st_read("data/nc_counties.geojson")
 
@@ -53,7 +53,7 @@ election_data_combined$Long <- as.numeric(as.character(election_data_combined$Lo
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
 
-# Define UI for application
+# Define UI for application ----------------------------------------------------
 ui <- fluidPage(
   
   titlePanel("North Carolina Election Data"),
@@ -61,7 +61,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       h4("Election Filters"),
-      selectInput("electioncounty", "Choose a County to View:",
+      selectInput("electionCounty", "Choose a County to View:",
                   choices = c("None" = "", sort(unique(election_data_combined$County))),
                   selected = ""),
       selectInput("political", "Choose a Political Party:",
@@ -82,22 +82,91 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      leafletOutput("map1"),
+      leafletOutput("map_election"),
       leafletOutput("map2")
     )
   )
 )
 
-
+# define server logic ----------------------------------------------------------
 server <- function(input, output, session) {
   
-  output$map1 <- renderLeaflet({
-    leaflet(data = counties_geo) |>
-      addTiles() |>
-      setView(lng = -79.0, lat = 35.5, zoom = 7)
+  # Map 1: Election data -------------------------------------------------------
+  
+  # calculate political orientation of each county based on selected year
+  combining_rep_dem <- reactive({
+    election_data_combined |>
+      filter(Year == as.numeric(input$year)) |>
+      select(County, rep_per_capita, dem_per_capita, Votes_REP, Votes_DEM) |>
+      mutate(politicalparty = Votes_REP/(Votes_REP + Votes_DEM))
   })
   
-  # Map 2: ACS Data
+  # create palette to color counties by political orientation
+  palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
+  
+  # render election map with selected year, but without selected county
+  output$map_election <- renderLeaflet({
+    leaflet(data = counties_geo) |>
+      addTiles() |>
+      setView(lng = -79.0, lat = 35.5, zoom = 7) |>
+      addPolygons(
+        fillColor = ~palette(combining_rep_dem()$politicalparty),
+        fillOpacity = 0.9,
+        color = "gray",
+        popup = ~ paste(
+          County, "<br>",
+          "Republican Votes: ", combining_rep_dem()$Votes_REP, "<br>",
+          "Democrat Votes: ", combining_rep_dem()$Votes_DEM, "<br>"
+        )
+      )
+  })
+  
+  # keep track of county that was previously selected
+  last_selected <- reactiveVal(NULL)
+  
+  # highlight selected county on map
+  observeEvent(input$electionCounty, {
+    new_selection <- input$electionCounty
+    old_selection <- last_selected()
+    last_selected(new_selection)  # Update the last selected county
+    
+    df <- combining_rep_dem()
+    
+    # Update the previously selected county to remove the highlight
+    if (!is.null(old_selection) && old_selection != "") {
+      leafletProxy("map_election") |>
+        addPolygons(
+          data = counties_geo[counties_geo$County == old_selection, ],
+          fillColor = palette(df$politicalparty[match(old_selection, df$County)]),
+          fillOpacity = 0.9,
+          color = "gray",
+          popup = ~ paste(
+            "County: ", County, "<br>",
+            "Republican Votes: ", df$Votes_REP[match(County, df$County)], "<br>",
+            "Democrat Votes: ", df$Votes_DEM[match(County, df$County)], "<br>"
+          )
+        )
+    }
+    
+    # Apply new highlight to the selected county
+    if (new_selection != "") {
+      leafletProxy("map_election") |>
+        addPolygons(
+          data = counties_geo[counties_geo$County == new_selection, ],
+          fillColor = "green",
+          fillOpacity = 1,
+          color = "black",
+          weight = 3,
+          popup = ~paste(
+            "Highlighted County: ", County, "<br>",
+            "Republican Votes: ", df$Votes_REP[match(County, df$County)], "<br>",
+            "Democrat Votes: ", df$Votes_DEM[match(County, df$County)], "<br>"
+          )
+        )
+    }
+  })
+  
+  # Map 2: ACS Data ------------------------------------------------------------
   output$map2 <- renderLeaflet({
     leaflet(data = counties_geo) |>
       addTiles() |>
@@ -128,7 +197,7 @@ server <- function(input, output, session) {
     
     matched_index_election <- match(counties_geo$County, df$County)
     matched_votes_election <- df$Votes[matched_index_election]
-    selected_county_election <- input$electioncounty
+    selected_county_election <- input$electionCounty
     
     palette <- colorQuantile(if (input$political == "Rep") "Reds" else "Blues", na.omit(matched_votes_election), n = 5)
     
