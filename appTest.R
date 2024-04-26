@@ -115,7 +115,7 @@ server <- function(input, output, session) {
   # create palette to color counties by political orientation
   palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
 
-  # Render map with selected year
+  # render map based on selected year
   output$map_election <- renderLeaflet({
     leaflet(data = combined_data()) |>
       addTiles() |>
@@ -133,18 +133,17 @@ server <- function(input, output, session) {
       )
   })
 
-  # Keep track of county that was previously selected
+  # keep track of county that was previously selected
   last_selected <- reactiveVal(NULL)
 
-  # Highlight selected county on map
+  # listen for changes to selected county
   observeEvent(input$electionCounty, {
     new_selection <- input$electionCounty
     old_selection <- last_selected()
 
-    # Ensure selections are valid before proceeding
+    # reset previously selected county if applicable
     if (!is.null(old_selection) && old_selection != "" &&
       any(combined_data()$County == old_selection)) {
-      # Reset the previously selected county to its original state
       leafletProxy("map_election") |>
         removeShape(layerId = old_selection) |>
         addPolygons(
@@ -161,9 +160,9 @@ server <- function(input, output, session) {
           layerId = ~County
         )
     }
-
+  
+    # highlight selected county if valid
     if (new_selection != "" && any(combined_data()$County == new_selection)) {
-      # Apply new highlight to the selected county
       leafletProxy("map_election") |>
         addPolygons(
           data = combined_data() |> filter(County == new_selection),
