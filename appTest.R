@@ -122,14 +122,14 @@ server <- function(input, output, session) {
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
         fillColor = ~ palette(politicalparty),
-        fillOpacity = 0.5, # Set default fill opacity
+        fillOpacity = 0.4,
         color = "gray",
         popup = ~ paste(
           "County: ", County, "<br>",
           "Republican Votes: ", Votes_REP, "<br>",
           "Democrat Votes: ", Votes_DEM, "<br>"
         ),
-        layerId = ~County # Important: Assign a unique layer ID for each county
+        layerId = ~County
       )
   })
 
@@ -149,7 +149,7 @@ server <- function(input, output, session) {
         addPolygons(
           data = combined_data() |> filter(County == old_selection),
           fillColor = ~ palette(politicalparty),
-          fillOpacity = 0.5,
+          fillOpacity = 0.4,
           color = "gray",
           weight = 1,
           popup = ~ paste(
@@ -166,10 +166,10 @@ server <- function(input, output, session) {
       leafletProxy("map_election") |>
         addPolygons(
           data = combined_data() |> filter(County == new_selection),
-          fillColor = "green",
+          fillColor = ~ palette(politicalparty),
           fillOpacity = 1,
           color = "black",
-          weight = 3,
+          weight = 5,
           popup = ~ paste(
             "Highlighted County: ", County, "<br>",
             "Republican Votes: ", Votes_REP, "<br>",
@@ -179,7 +179,7 @@ server <- function(input, output, session) {
         )
     }
 
-    last_selected(new_selection) # Update the last selected county
+    last_selected(new_selection)
   })
 
   # MAP 2: ACS Data ------------------------------------------------------------
