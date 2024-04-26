@@ -22,11 +22,12 @@ library(sf)
 election_data_combined <- read_csv("data/election_data_wide_geo.csv")
 counties_geo <- st_read("data/nc_counties.geojson")
 
-election_data_combined
-glimpse(counties_geo)
-
 counties_geo <- counties_geo |>
   mutate(County = str_to_upper(County))
+
+election_data_combined <- election_data_combined %>%
+  mutate(County = str_to_upper(County))
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -35,7 +36,7 @@ ui <- fluidPage(
   titlePanel("North Carolina Election Data"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("county", "Choose a County to View:",
+      selectInput("electionCounty", "Choose a County to View:",
                   choices = c("None" = "", election_data_combined$County),
                   selected = ""
       ),
@@ -47,7 +48,7 @@ ui <- fluidPage(
       width = 3
     ),
     mainPanel(
-      leafletOutput("map"),
+      leafletOutput("map_election"),
       width = 9
 )
 )
@@ -62,74 +63,87 @@ server <- function(input, output, session) {
       mutate(politicalparty = Votes_REP/(Votes_REP + Votes_DEM))
   })
   
+  combined_data <- reactive({
+    merge(counties_geo, combining_rep_dem(), by = "County")
+  })
+  
   palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
-  # render map without selected county, just selected year
-  output$map <- renderLeaflet({
-    
-    
-    leaflet(data = counties_geo) |>
+  
+  # Render map with selected year
+  output$map_election <- renderLeaflet({
+    leaflet(data = combined_data()) |>
       addTiles() |>
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
-        fillColor = ~palette(combining_rep_dem()$politicalparty),
-        fillOpacity = 0.9,
+        fillColor = ~palette(politicalparty),
+        fillOpacity = 0.5,  # Set default fill opacity
         color = "gray",
-        popup = ~ paste(
-          County, "<br>",
-          "Republican Votes: ", combining_rep_dem()$Votes_REP, "<br>",
-          "Democrat Votes: ", combining_rep_dem()$Votes_DEM, "<br>"
-        )
+        popup = ~paste(
+          "County: ", County, "<br>",
+          "Republican Votes: ", Votes_REP, "<br>",
+          "Democrat Votes: ", Votes_DEM, "<br>"
+        ),
+        layerId = ~County  # Important: Assign a unique layer ID for each county
       )
   })
   
+  # Keep track of county that was previously selected
   last_selected <- reactiveVal(NULL)
   
-  observeEvent(input$county, {
-    new_selection <- input$county
+  # Highlight selected county on map
+  observeEvent(input$electionCounty, {
+    new_selection <- input$electionCounty
     old_selection <- last_selected()
-    last_selected(new_selection)  # Update the last selected county
     
-    df <- combining_rep_dem()
-    
-    # Update the previously selected county to remove the highlight
-    if (!is.null(old_selection) && old_selection != "") {
-      leafletProxy("map") |>
+    # Ensure selections are valid before proceeding
+    if (!is.null(old_selection) && old_selection != "" && any(combined_data()$County == old_selection)) {
+      # Reset the previously selected county to its original state
+      leafletProxy("map_election") %>%
+        removeShape(layerId = old_selection) %>%
         addPolygons(
-          data = counties_geo[counties_geo$County == old_selection, ],
-          fillColor = palette(df$politicalparty[match(old_selection, df$County)]),
-          fillOpacity = 0.9,
+          data = combined_data() %>% filter(County == old_selection),
+          fillColor = ~palette(politicalparty),
+          fillOpacity = 0.5,
           color = "gray",
-          popup = ~ paste(
+          weight = 1,
+          popup = ~paste(
             "County: ", County, "<br>",
-            "Republican Votes: ", df$Votes_REP[match(County, df$County)], "<br>",
-            "Democrat Votes: ", df$Votes_DEM[match(County, df$County)], "<br>"
-          )
+            "Republican Votes: ", Votes_REP, "<br>",
+            "Democrat Votes: ", Votes_DEM, "<br>"
+          ),
+          layerId = ~County
         )
     }
     
-    # Apply new highlight to the selected county
-    if (new_selection != "") {
-      leafletProxy("map") |>
+    if (new_selection != "" && any(combined_data()$County == new_selection)) {
+      # Apply new highlight to the selected county
+      leafletProxy("map_election") %>%
         addPolygons(
-          data = counties_geo[counties_geo$County == new_selection, ],
+          data = combined_data() %>% filter(County == new_selection),
           fillColor = "green",
           fillOpacity = 1,
           color = "black",
           weight = 3,
           popup = ~paste(
             "Highlighted County: ", County, "<br>",
-            "Republican Votes: ", df$Votes_REP[match(County, df$County)], "<br>",
-            "Democrat Votes: ", df$Votes_DEM[match(County, df$County)], "<br>"
-          )
+            "Republican Votes: ", Votes_REP, "<br>",
+            "Democrat Votes: ", Votes_DEM, "<br>"
+          ),
+          layerId = ~County
         )
     }
+    
+    last_selected(new_selection)  # Update the last selected county
   })
+
+  
+  
   observe({
     df <- combining_rep_dem()
     matched_political <- df$politicalparty
     
     palette <- colorNumeric(c("red", "white", "blue"), domain = range(matched_political, na.rm = TRUE))
-    leafletProxy("map", data = counties_geo) |>
+    leafletProxy("map_election", data = counties_geo) |>
       addLegend("bottomright",
                 pal = palette, values = ~matched_political,
                 title = "Republican to Democrat Scale Per Capita",
