@@ -122,7 +122,7 @@ server <- function(input, output, session) {
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
         fillColor = ~ palette(politicalparty),
-        fillOpacity = 0.4,
+        fillOpacity = 0.43,
         color = "gray",
         popup = ~ paste(
           "County: ", County, "<br>",
@@ -149,7 +149,7 @@ server <- function(input, output, session) {
         addPolygons(
           data = combined_data() |> filter(County == old_selection),
           fillColor = ~ palette(politicalparty),
-          fillOpacity = 0.4,
+          fillOpacity = 0.43,
           color = "gray",
           weight = 1,
           popup = ~ paste(
@@ -169,7 +169,7 @@ server <- function(input, output, session) {
           fillColor = ~ palette(politicalparty),
           fillOpacity = 1,
           color = "black",
-          weight = 5,
+          weight = 6,
           popup = ~ paste(
             "Highlighted County: ", County, "<br>",
             "Republican Votes: ", Votes_REP, "<br>",
