@@ -67,8 +67,8 @@ ui <- fluidPage(
   # titlePanel("North Carolina Election Data"),
   sidebarLayout(
     sidebarPanel(
-      h4("Election Filters"),
-      selectInput("electionCounty", "Choose a County to View:",
+      h4("Global Filters"),
+      selectInput("electionCounty", "Choose a County to Highlight:",
         choices = c("None" = "", sort(unique(election_data_combined$County))),
         selected = ""
       ),
@@ -79,10 +79,10 @@ ui <- fluidPage(
       ),
       hr(),
       h4("ACS Filters"),
-      selectInput("ACScounty", "Choose a County to View:",
-        choices = c("None" = "", sort(unique(ACS$County))),
-        selected = ""
-      ),
+      # selectInput("ACScounty", "Choose a County to View:",
+      #   choices = c("None" = "", sort(unique(ACS$County))),
+      #   selected = ""
+      # ),
       selectInput("sex", "Sex:",
         choices = c("All", sort(unique(ACS$Sex))),
         selected = "All"
@@ -147,7 +147,8 @@ server <- function(input, output, session) {
         popup = ~ paste(
           "County: ", County, "<br>",
           "Republican Votes: ", Votes_REP, "<br>",
-          "Democrat Votes: ", Votes_DEM, "<br>"
+          "Democrat Votes: ", Votes_DEM, "<br>",
+          "% Votes for GOP: ", politicalparty
         ),
         layerId = ~County
       ) |>
@@ -182,7 +183,8 @@ server <- function(input, output, session) {
           popup = ~ paste(
             "County: ", County, "<br>",
             "Republican Votes: ", Votes_REP, "<br>",
-            "Democrat Votes: ", Votes_DEM, "<br>"
+            "Democrat Votes: ", Votes_DEM, "<br>",
+            "% Votes for GOP: ", politicalparty
           ),
           layerId = ~County
         )
@@ -200,7 +202,8 @@ server <- function(input, output, session) {
           popup = ~ paste(
             "Highlighted County: ", County, "<br>",
             "Republican Votes: ", Votes_REP, "<br>",
-            "Democrat Votes: ", Votes_DEM, "<br>"
+            "Democrat Votes: ", Votes_DEM, "<br>",
+            "% Votes for GOP: ", politicalparty
           ),
           layerId = ~County
         )
@@ -231,9 +234,20 @@ server <- function(input, output, session) {
         filter(Age_Category == input$ageCategory)
     }
 
+    # data <- data |>
+    #   group_by(County) |>
+    #   reframe(popProp = sum(Count, na.rm = TRUE) / first(countyPop))
+    
     data <- data |>
-      group_by(County) |>
-      reframe(popProp = sum(Count, na.rm = TRUE) / first(countyPop))
+      group_by(County, Year) |>  # Ensure grouping includes Year if it's relevant
+      summarise(
+        TotalCount = sum(Count, na.rm = TRUE),
+        countyPop = first(countyPop)  # Ensure countyPop is maintained correctly
+      ) |>
+      ungroup() |>
+      mutate(
+        popProp = if_else(countyPop > 0, TotalCount / countyPop, 0)
+      )
 
     data <- merge(counties_geo, data, by = "County", all.x = TRUE)
 
@@ -245,6 +259,8 @@ server <- function(input, output, session) {
   # output ACS map based on selected filters
   output$map_ACS <- renderLeaflet({
     pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
+    
+    print(head(filter_pops()))
 
     leaflet(data = filter_pops()) |>
       addTiles() |>
@@ -254,7 +270,9 @@ server <- function(input, output, session) {
         fillOpacity = 1,
         color = "gray",
         popup = ~ paste(
-          "County: ", County, "<br>"
+          "County: ", County, "<br>",
+          "Total Pop.: ", countyPop, "<br>",
+          "% of Pop.: ", scales::percent(popProp)
         ),
       ) |>
       addLegend("bottomright", 
