@@ -47,13 +47,19 @@ ACS_all_pivot <- pivot_longer(
   )
 
 ACS <- ACS_all_pivot |>
-  select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count) |>
+  select(County, Year, Race, Sex, Lat, Long, Age_Category, Count) |>
   mutate(County = toupper(County))
+
+county_pops <- ACS |>
+  group_by(County, Year) |>
+  reframe(countyPop = sum(Count, na.rm = TRUE))
+
+ACS <- merge(ACS, county_pops, by = c("County", "Year"))
 
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
 
-glimpse(county_pops)
+glimpse(ACS)
 
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
@@ -79,12 +85,19 @@ ui <- fluidPage(
       selectInput("ACScounty", "Choose a County to View:",
         choices = c("None" = "", sort(unique(ACS$County))),
         selected = ""
-      ),
-      selectInput("Sex", "Sex:", choices = c("All", sort(unique(ACS$Sex)))),
-      selectInput("Race", "Race:", choices = c("All", sort(unique(ACS$Race)))),
+                  ),
+      selectInput("Sex", "Sex:", 
+                  choices = c("All", sort(unique(ACS$Sex))),
+                  selected = "All"
+                  ),
+      selectInput("Race", "Race:", 
+                  choices = c("All", sort(unique(ACS$Race))),
+                  selected = "All"
+                  ),
       selectInput("Age_Category", "Age Category:",
-        choices = c("All", sort(unique(ACS$Age_Category)))
-      )
+        choices = c("All", sort(unique(ACS$Age_Category))),
+        selected = "All"
+                  )
     ),
     mainPanel(
       h4("Election Data Map", style = "text-align: center;"),
@@ -184,38 +197,34 @@ server <- function(input, output, session) {
   })
 
   # MAP 2: ACS Data ------------------------------------------------------------
-  # combining_rep_dem <- reactive({
-  #   election_data_combined |>
-  #     filter(Year == as.numeric(input$year)) |>
-  #     select(County, Votes_REP, Votes_DEM) |>
-  #     mutate(politicalparty = Votes_REP / (Votes_REP + Votes_DEM))
-  # })
   
   filter_pops <- reactive({
+    #req(input$year, input$race, input$sex, input$Age_Category)
     data <- ACS |>
       filter(Year == as.numeric(input$year))
     
-    if (isTruthy(input$race) && input$race != "All") {
+    if (!is.null(input$race) && input$race != "All") {
       data <- data |>
         filter(Race == input$race)
     }
     
-    if (isTruthy(input$sex) &&input$sex != "All") {
+    if (!is.null(input$sex) &&input$sex != "All") {
       data <- data |>
         filter(Sex == input$sex)
     }
     
-    if (isTruthy(input$Age_Category) &&input$Age_Category != "All") {
+    if (!is.null(input$Age_Category) &&input$Age_Category != "All") {
       data <- data |>
         filter(Age_Category == input$Age_Category)
     }
     
     data <- data |>
       group_by(County) |>
-      summarize(totalPop = sum(Count, na.rm = TRUE)) |>
-      ungroup()
+      reframe(popProp = sum(Count, na.rm = TRUE) / first(countyPop))
     
-    data <- merge(counties_geo, data, by = "County")
+    data <- merge(counties_geo, data, by = "County", all.x = TRUE)
+    
+    data$popProp[is.na(data$popProp)] <- 0
     
     data
   })
@@ -224,13 +233,13 @@ server <- function(input, output, session) {
   output$map_ACS <- renderLeaflet({
     req(filter_pops())
     data <- filter_pops()
-    pop_palette <- colorQuantile("Greens", domain = data$totalPop, n = 9)
+    pop_palette <- colorNumeric("Greens", domain = data$popProp)
     
     leaflet(data = data) |>
       addTiles() |>
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
-        fillColor = ~ pop_palette(totalPop),
+        fillColor = ~ pop_palette(popProp),
         fillOpacity = 1, 
         color = "gray"
       )
