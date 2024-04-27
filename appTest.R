@@ -9,7 +9,7 @@ library(tidyverse)
 library(sf)
 
 
-# Load Data ---------------------------------------------------------------------
+# Load Data --------------------------------------------------------------------
 election_data_combined <- read_csv("data/election_data_wide_geo.csv",
   show_col_types = FALSE
 )
@@ -49,8 +49,16 @@ ACS_all_pivot <- pivot_longer(
 ACS <- ACS_all_pivot |>
   select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count)
 
+county_pops <- ACS |>
+  group_by(County, Year) |>
+  summarize(totalPop = sum(Count)) |>
+  ungroup() |>
+  mutate(County = toupper(County))
+
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
+
+glimpse(ACS)
 
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
@@ -181,30 +189,53 @@ server <- function(input, output, session) {
   })
 
   # MAP 2: ACS Data ------------------------------------------------------------
-  output$map_ACS <- renderLeaflet({
-    leaflet(data = counties_geo) |>
-      addTiles() |>
-      setView(lng = -79.0, lat = 35.5, zoom = 7)
-  })
-
-  picking_political <- reactive({
-    election_data_for_year <- election_data_combined |>
+  # combining_rep_dem <- reactive({
+  #   election_data_combined |>
+  #     filter(Year == as.numeric(input$year)) |>
+  #     select(County, Votes_REP, Votes_DEM) |>
+  #     mutate(politicalparty = Votes_REP / (Votes_REP + Votes_DEM))
+  # })
+  
+  filter_pops <- reactive({
+    county_pops |>
       filter(Year == as.numeric(input$year))
-
-    if (input$political == "Rep") {
-      election_data_for_year <- election_data_for_year |>
-        select(County, Votes_REP)
-      names(election_data_for_year)[names(election_data_for_year)
-      == "Votes_REP"] <- "Votes"
-    } else {
-      election_data_for_year <- election_data_for_year |>
-        select(County, Votes_DEM)
-      names(election_data_for_year)[names(election_data_for_year)
-      == "Votes_DEM"] <- "Votes"
-    }
-
-    election_data_for_year
   })
+  
+  acs_geo_combined <- reactive({
+    merge(counties_geo, filter_pops(), by = "County")
+  })
+  
+  pop_palette <- colorQuantile("Greens", na.omit(county_pops$totalPop), n = 10)
+  
+  output$map_ACS <- renderLeaflet({
+    leaflet(data = acs_geo_combined()) |>
+      addTiles() |>
+      setView(lng = -79.0, lat = 35.5, zoom = 7) |>
+      addPolygons(
+        fillColor = ~ pop_palette(totalPop),
+        fillOpacity = 1, 
+        color = "gray"
+      )
+  })
+
+  # picking_political <- reactive({
+  #   election_data_for_year <- election_data_combined |>
+  #     filter(Year == as.numeric(input$year))
+  # 
+  #   if (input$political == "Rep") {
+  #     election_data_for_year <- election_data_for_year |>
+  #       select(County, Votes_REP)
+  #     names(election_data_for_year)[names(election_data_for_year)
+  #     == "Votes_REP"] <- "Votes"
+  #   } else {
+  #     election_data_for_year <- election_data_for_year |>
+  #       select(County, Votes_DEM)
+  #     names(election_data_for_year)[names(election_data_for_year)
+  #     == "Votes_DEM"] <- "Votes"
+  #   }
+  # 
+  #   election_data_for_year
+  # })
 
 
   # observe({
@@ -237,50 +268,50 @@ server <- function(input, output, session) {
   # })
 
 
-  ACS_filtered <- reactive({
-    ACS_year <- ACS |>
-      filter(Year == as.numeric(input$year))
+  # ACS_filtered <- reactive({
+  #   ACS_year <- ACS |>
+  #     filter(Year == as.numeric(input$year))
+  # 
+  #   if (input$Sex != "All") {
+  #     ACS_year <- ACS_year |>
+  #       filter(Sex == input$Sex)
+  #   }
+  # 
+  #   if (input$Race != "All") {
+  #     ACS_year <- ACS_year |>
+  #       filter(Race == input$Race)
+  #   }
+  # 
+  #   if (input$Age_Category != "All") {
+  #     ACS_year <- ACS_year |>
+  #       filter(Age_Category == input$Age_Category)
+  #   }
+  # 
+  #   ACS_year
+  # })
 
-    if (input$Sex != "All") {
-      ACS_year <- ACS_year |>
-        filter(Sex == input$Sex)
-    }
 
-    if (input$Race != "All") {
-      ACS_year <- ACS_year |>
-        filter(Race == input$Race)
-    }
-
-    if (input$Age_Category != "All") {
-      ACS_year <- ACS_year |>
-        filter(Age_Category == input$Age_Category)
-    }
-
-    ACS_year
-  })
-
-
-  observe({
-    df <- ACS_filtered()
-
-    matched_index_ACS <- match(counties_geo$County, df$County)
-    matched_votes_ACS <- df$Votes[matched_index_ACS]
-    selected_county_ACS <- input$ACScounty
-
-    palette1 <- colorQuantile("Blues", na.omit(df$Count), n = 5)
-
-    leafletProxy("map_ACS", data = counties_geo) |>
-      clearShapes() |>
-      addPolygons(
-        fillColor = ~ palette1(df$Count[matched_index_ACS]),
-        fillOpacity = ~ ifelse(County == selected_county_ACS, 1, 0.5),
-        color = ~ ifelse(County == selected_county_ACS, "black", "gray"),
-        opacity = 1,
-        smoothFactor = 0,
-        weight = ~ ifelse(County == selected_county_ACS, 3, 1),
-        # popup = ~paste(County, "<br>", "Population: ", Count)
-      )
-  })
+  # observe({
+  #   df <- ACS_filtered()
+  # 
+  #   matched_index_ACS <- match(counties_geo$County, df$County)
+  #   matched_votes_ACS <- df$Votes[matched_index_ACS]
+  #   selected_county_ACS <- input$ACScounty
+  # 
+  #   palette1 <- colorQuantile("Blues", na.omit(df$Count), n = 5)
+  # 
+  #   leafletProxy("map_ACS", data = counties_geo) |>
+  #     clearShapes() |>
+  #     addPolygons(
+  #       fillColor = ~ palette1(df$Count[matched_index_ACS]),
+  #       fillOpacity = ~ ifelse(County == selected_county_ACS, 1, 0.5),
+  #       color = ~ ifelse(County == selected_county_ACS, "black", "gray"),
+  #       opacity = 1,
+  #       smoothFactor = 0,
+  #       weight = ~ ifelse(County == selected_county_ACS, 3, 1),
+  #       # popup = ~paste(County, "<br>", "Population: ", Count)
+  #     )
+  # })
 }
 
 shinyApp(ui = ui, server = server)
