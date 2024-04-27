@@ -231,11 +231,9 @@ server <- function(input, output, session) {
   
   
   output$map_ACS <- renderLeaflet({
-    req(filter_pops())
-    data <- filter_pops()
-    pop_palette <- colorNumeric("Greens", domain = data$popProp)
+    pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
     
-    leaflet(data = data) |>
+    leaflet(data = filter_pops()) |>
       addTiles() |>
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
