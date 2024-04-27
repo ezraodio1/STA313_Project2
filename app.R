@@ -65,44 +65,57 @@ ACS <- merge(ACS, county_pops, by = c("County", "Year"))
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
   # titlePanel("North Carolina Election Data"),
-  sidebarLayout(
-    sidebarPanel(
-      h4("Global Filters"),
-      selectInput("electionCounty", "Choose a County to Highlight:",
-        choices = c("None" = "", sort(unique(election_data_combined$County))),
-        selected = ""
-      ),
-      selectInput("year",
-        "Election Year:",
-        choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
-        selected = "2020"
-      ),
-      hr(),
-      h4("ACS Filters"),
-      # selectInput("ACScounty", "Choose a County to View:",
-      #   choices = c("None" = "", sort(unique(ACS$County))),
-      #   selected = ""
-      # ),
-      selectInput("sex", "Sex:",
-        choices = c("All", sort(unique(ACS$Sex))),
-        selected = "All"
-      ),
-      selectInput("race", "Race:",
-        choices = c("All", sort(unique(ACS$Race))),
-        selected = "All"
-      ),
-      selectInput("ageCategory", "Age Category:",
-        choices = c("All", sort(unique(ACS$Age_Category))),
-        selected = "All"
+  tabsetPanel(
+    tabPanel("Home", fluidPage(
+      sidebarLayout(
+        sidebarPanel(
+          h4("Global Filters"),
+          selectInput("electionCounty", "Choose a County to Highlight:",
+                      choices = c("None" = "", sort(unique(election_data_combined$County))),
+                      selected = ""
+          ),
+          selectInput("year",
+                      "Election Year:",
+                      choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
+                      selected = "2020"
+          ),
+          hr(),
+          h4("ACS Filters"),
+          # selectInput("ACScounty", "Choose a County to View:",
+          #   choices = c("None" = "", sort(unique(ACS$County))),
+          #   selected = ""
+          # ),
+          selectInput("sex", "Sex:",
+                      choices = c("All", sort(unique(ACS$Sex))),
+                      selected = "All"
+          ),
+          selectInput("race", "Race:",
+                      choices = c("All", sort(unique(ACS$Race))),
+                      selected = "All"
+          ),
+          selectInput("ageCategory", "Age Category:",
+                      choices = c("All", sort(unique(ACS$Age_Category))),
+                      selected = "All"
+          )
+        ),
+        mainPanel(
+          h4("Election Data Map", style = "text-align: center;"),
+          leafletOutput("map_election", height = "350px"),
+          # div(style = "margin-top: 20px;"),
+          h4("ACS Data Map", style = "text-align: center;"),
+          leafletOutput("map_ACS", height = "350px")
+        )
       )
-    ),
-    mainPanel(
-      h4("Election Data Map", style = "text-align: center;"),
-      leafletOutput("map_election", height = "350px"),
-      # div(style = "margin-top: 20px;"),
-      h4("ACS Data Map", style = "text-align: center;"),
-      leafletOutput("map_ACS", height = "350px")
-    )
+    )),
+    tabPanel("Write-Up", fluidPage(
+      titlePanel("Write-Up")
+    )),
+    tabPanel("Data Table", fluidPage(
+      titlePanel("Data Table")
+    )),
+    tabPanel("Animated Plot", fluidPage(
+      titlePanel("NC Over Time")
+    ))
   )
 )
 
@@ -139,7 +152,7 @@ server <- function(input, output, session) {
   output$map_election <- renderLeaflet({
     leaflet(data = combined_data()) |>
       addTiles() |>
-      setView(lng = -79.0, lat = 35.5, zoom = 7) |>
+      setView(lng = -79.1, lat = 35.2, zoom = 7) |>
       addPolygons(
         fillColor = ~ palette(politicalparty),
         fillOpacity = 1,
@@ -258,7 +271,7 @@ server <- function(input, output, session) {
 
     leaflet(data = filter_pops()) |>
       addTiles() |>
-      setView(lng = -79.0, lat = 35.5, zoom = 7) |>
+      setView(lng = -79.1, lat = 35.2, zoom = 7) |>
       addPolygons(
         fillColor = ~ pop_palette(popProp),
         fillOpacity = 1,
