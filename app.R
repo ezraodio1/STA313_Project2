@@ -59,8 +59,6 @@ ACS <- merge(ACS, county_pops, by = c("County", "Year"))
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
 
-glimpse(ACS)
-
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
   #titlePanel("North Carolina Election Data"),
@@ -71,10 +69,10 @@ ui <- fluidPage(
                   choices = c("None" = "", sort(unique(election_data_combined$County))),
                   selected = ""
       ),
-      selectInput("political", "Choose a Political Party:",
-                  choices = c("Rep" = "Rep", "Dem" = "Dem"),
-                  selected = "Rep"
-      ),
+      # selectInput("political", "Choose a Political Party:",
+      #             choices = c("Rep" = "Rep", "Dem" = "Dem"),
+      #             selected = "Rep"
+      # ),
       selectInput("year",
                   "Election Year:",
                   choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
