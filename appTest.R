@@ -47,18 +47,13 @@ ACS_all_pivot <- pivot_longer(
   )
 
 ACS <- ACS_all_pivot |>
-  select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count)
-
-county_pops <- ACS |>
-  group_by(County, Year) |>
-  summarize(totalPop = sum(Count)) |>
-  ungroup() |>
+  select(fips, County, Year, Race, Sex, Lat, Long, Age_Category, Count) |>
   mutate(County = toupper(County))
 
 ACS$Lat <- as.numeric(as.character(ACS$Lat))
 ACS$Long <- as.numeric(as.character(ACS$Long))
 
-glimpse(ACS)
+glimpse(county_pops)
 
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
@@ -197,18 +192,41 @@ server <- function(input, output, session) {
   # })
   
   filter_pops <- reactive({
-    county_pops |>
+    data <- ACS |>
       filter(Year == as.numeric(input$year))
+    
+    if (isTruthy(input$race) && input$race != "All") {
+      data <- data |>
+        filter(Race == input$race)
+    }
+    
+    if (isTruthy(input$sex) &&input$sex != "All") {
+      data <- data |>
+        filter(Sex == input$sex)
+    }
+    
+    if (isTruthy(input$Age_Category) &&input$Age_Category != "All") {
+      data <- data |>
+        filter(Age_Category == input$Age_Category)
+    }
+    
+    data <- data |>
+      group_by(County) |>
+      summarize(totalPop = sum(Count, na.rm = TRUE)) |>
+      ungroup()
+    
+    data <- merge(counties_geo, data, by = "County")
+    
+    data
   })
   
-  acs_geo_combined <- reactive({
-    merge(counties_geo, filter_pops(), by = "County")
-  })
-  
-  pop_palette <- colorQuantile("Greens", na.omit(county_pops$totalPop), n = 10)
   
   output$map_ACS <- renderLeaflet({
-    leaflet(data = acs_geo_combined()) |>
+    req(filter_pops())
+    data <- filter_pops()
+    pop_palette <- colorQuantile("Greens", domain = data$totalPop, n = 9)
+    
+    leaflet(data = data) |>
       addTiles() |>
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
