@@ -203,14 +203,14 @@ server <- function(input, output, session) {
     data <- ACS |>
       filter(Year == as.numeric(input$year))
     
-    if (!is.null(input$race) && input$race != "All") {
+    if (!is.null(input$Race) && input$Race != "All") {
       data <- data |>
-        filter(Race == input$race)
+        filter(Race == input$Race)
     }
     
-    if (!is.null(input$sex) &&input$sex != "All") {
+    if (!is.null(input$Sex) &&input$Sex != "All") {
       data <- data |>
-        filter(Sex == input$sex)
+        filter(Sex == input$Sex)
     }
     
     if (!is.null(input$Age_Category) &&input$Age_Category != "All") {
@@ -242,6 +242,22 @@ server <- function(input, output, session) {
         color = "gray"
       )
   })
+  
+  # observeEvent(input$year, {
+  #   output$map_ACS <- renderLeaflet({})
+  # })
+  # 
+  # observeEvent(input$race, {
+  #   output$map_ACS <- renderLeaflet({})
+  # })
+  # 
+  # observeEvent(input$sex, {
+  #   output$map_ACS <- renderLeaflet({})
+  # })
+  # 
+  # observeEvent(input$Age_Category, {
+  #   output$map_ACS <- renderLeaflet({})
+  # })
 
   # picking_political <- reactive({
   #   election_data_for_year <- election_data_combined |>
