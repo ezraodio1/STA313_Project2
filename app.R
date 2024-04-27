@@ -72,10 +72,6 @@ ui <- fluidPage(
         choices = c("None" = "", sort(unique(election_data_combined$County))),
         selected = ""
       ),
-      # selectInput("political", "Choose a Political Party:",
-      #             choices = c("Rep" = "Rep", "Dem" = "Dem"),
-      #             selected = "Rep"
-      # ),
       selectInput("year",
         "Election Year:",
         choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
@@ -129,6 +125,15 @@ server <- function(input, output, session) {
 
   # create palette to color counties by political orientation
   palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
+  
+  # reactive expression for fillOpacity
+  # fillOpacityCalc <- reactive({
+  #   if (is.null(input$electionCounty) || input$electionCounty == "") {
+  #     return(rep(1, nrow(combined_data()))) 
+  #   } else {
+  #     return(ifelse(combined_data()$County == input$electionCounty, 1, 0.33))
+  #   }
+  # })
 
   # render map based on selected year
   output$map_election <- renderLeaflet({
@@ -137,7 +142,7 @@ server <- function(input, output, session) {
       setView(lng = -79.0, lat = 35.5, zoom = 7) |>
       addPolygons(
         fillColor = ~ palette(politicalparty),
-        fillOpacity = 0.43,
+        fillOpacity = 1,
         color = "gray",
         popup = ~ paste(
           "County: ", County, "<br>",
@@ -145,7 +150,14 @@ server <- function(input, output, session) {
           "Democrat Votes: ", Votes_DEM, "<br>"
         ),
         layerId = ~County
-      )
+      ) |>
+      addLegend("bottomright", 
+                pal = palette, 
+                values = c(0, 1), 
+                title = "% Votes for GOP",
+                labFormat = labelFormat(
+                  transform = function(x) x * 100, suffix = "%")
+                )
   })
 
   # keep track of county that was previously selected
@@ -164,7 +176,7 @@ server <- function(input, output, session) {
         addPolygons(
           data = combined_data() |> filter(County == oldSelection),
           fillColor = ~ palette(politicalparty),
-          fillOpacity = 0.43,
+          fillOpacity = 1,
           color = "gray",
           weight = 1,
           popup = ~ paste(
@@ -181,7 +193,7 @@ server <- function(input, output, session) {
       leafletProxy("map_election") |>
         addPolygons(
           data = combined_data() |> filter(County == newSelection),
-          fillColor = ~ palette(politicalparty),
+          fillColor = "yellow",
           fillOpacity = 1,
           color = "black",
           weight = 6,
@@ -240,8 +252,19 @@ server <- function(input, output, session) {
       addPolygons(
         fillColor = ~ pop_palette(popProp),
         fillOpacity = 1,
-        color = "gray"
-      )
+        color = "gray",
+        popup = ~ paste(
+          "County: ", County, "<br>"
+        ),
+      ) |>
+      addLegend("bottomright", 
+                pal = pop_palette, 
+                values = ~popProp,
+                title = "% of Population",
+                opacity = 1.0,
+                labFormat = labelFormat(
+                  transform = function(x) x * 100, suffix = "%")
+                )
   })
 }
 
