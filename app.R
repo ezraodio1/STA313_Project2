@@ -1,3 +1,4 @@
+# load packages ----------------------------------------------------------------
 library(shiny)
 library(leaflet)
 library(rjson)
@@ -9,10 +10,11 @@ library(tidyverse)
 library(sf)
 
 
-# Load Data --------------------------------------------------------------------
+# load data --------------------------------------------------------------------
 election_data_combined <- read_csv("data/election_data_wide_geo.csv",
   show_col_types = FALSE
 )
+
 counties_geo <- st_read("data/nc_counties.geojson")
 
 counties_geo <- counties_geo |>
@@ -85,11 +87,11 @@ ui <- fluidPage(
         choices = c("None" = "", sort(unique(ACS$County))),
         selected = ""
       ),
-      selectInput("Sex", "Sex:",
+      selectInput("sex", "Sex:",
         choices = c("All", sort(unique(ACS$Sex))),
         selected = "All"
       ),
-      selectInput("Race", "Race:",
+      selectInput("race", "Race:",
         choices = c("All", sort(unique(ACS$Race))),
         selected = "All"
       ),
@@ -110,7 +112,7 @@ ui <- fluidPage(
 
 # define server logic ----------------------------------------------------------
 server <- function(input, output, session) {
-  # MAP 1: Election data -------------------------------------------------------
+  # Map 1: Election data -------------------------------------------------------
 
   # calculate political orientation of each county based on selected year
   combining_rep_dem <- reactive({
@@ -147,20 +149,20 @@ server <- function(input, output, session) {
   })
 
   # keep track of county that was previously selected
-  last_selected <- reactiveVal(NULL)
+  lastSelected <- reactiveVal(NULL)
 
   # listen for changes to selected county
   observeEvent(input$electionCounty, {
-    new_selection <- input$electionCounty
-    old_selection <- last_selected()
+    newSelection <- input$electionCounty
+    oldSelection <- lastSelected()
 
     # reset previously selected county if applicable
-    if (!is.null(old_selection) && old_selection != "" &&
-      any(combined_data()$County == old_selection)) {
+    if (!is.null(oldSelection) && oldSelection != "" &&
+      any(combined_data()$County == oldSelection)) {
       leafletProxy("map_election") |>
-        removeShape(layerId = old_selection) |>
+        removeShape(layerId = oldSelection) |>
         addPolygons(
-          data = combined_data() |> filter(County == old_selection),
+          data = combined_data() |> filter(County == oldSelection),
           fillColor = ~ palette(politicalparty),
           fillOpacity = 0.43,
           color = "gray",
@@ -175,10 +177,10 @@ server <- function(input, output, session) {
     }
 
     # highlight selected county if valid
-    if (new_selection != "" && any(combined_data()$County == new_selection)) {
+    if (newSelection != "" && any(combined_data()$County == newSelection)) {
       leafletProxy("map_election") |>
         addPolygons(
-          data = combined_data() |> filter(County == new_selection),
+          data = combined_data() |> filter(County == newSelection),
           fillColor = ~ palette(politicalparty),
           fillOpacity = 1,
           color = "black",
@@ -192,24 +194,24 @@ server <- function(input, output, session) {
         )
     }
 
-    last_selected(new_selection)
+    lastSelected(newSelection)
   })
 
-  # MAP 2: ACS Data ------------------------------------------------------------
+  # Map 2: ACS Data ------------------------------------------------------------
 
   # filter ACS data based on selected filters
   filter_pops <- reactive({
     data <- ACS |>
       filter(Year == as.numeric(input$year))
 
-    if (!is.null(input$Race) && input$Race != "All") {
+    if (!is.null(input$race) && input$race != "All") {
       data <- data |>
-        filter(Race == input$Race)
+        filter(Race == input$race)
     }
 
-    if (!is.null(input$Sex) && input$Sex != "All") {
+    if (!is.null(input$sex) && input$sex != "All") {
       data <- data |>
-        filter(Sex == input$Sex)
+        filter(Sex == input$sex)
     }
 
     if (!is.null(input$ageCategory) && input$ageCategory != "All") {
