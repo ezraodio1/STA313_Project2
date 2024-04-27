@@ -146,9 +146,9 @@ server <- function(input, output, session) {
         color = "gray",
         popup = ~ paste(
           "County: ", County, "<br>",
-          "Republican Votes: ", Votes_REP, "<br>",
-          "Democrat Votes: ", Votes_DEM, "<br>",
-          "% Votes for GOP: ", politicalparty
+          "Republican Votes: ", scales::comma(Votes_REP), "<br>",
+          "Democrat Votes: ", scales::comma(Votes_DEM), "<br>",
+          "% Votes for GOP: ", scales::percent(politicalparty, accuracy = 1)
         ),
         layerId = ~County
       ) |>
@@ -182,9 +182,9 @@ server <- function(input, output, session) {
           weight = 1,
           popup = ~ paste(
             "County: ", County, "<br>",
-            "Republican Votes: ", Votes_REP, "<br>",
-            "Democrat Votes: ", Votes_DEM, "<br>",
-            "% Votes for GOP: ", politicalparty
+            "Republican Votes: ", scales::comma(Votes_REP), "<br>",
+            "Democrat Votes: ", scales::comma(Votes_DEM), "<br>",
+            "% Votes for GOP: ", scales::percent(politicalparty, accuracy = 1)
           ),
           layerId = ~County
         )
@@ -201,9 +201,9 @@ server <- function(input, output, session) {
           weight = 6,
           popup = ~ paste(
             "Highlighted County: ", County, "<br>",
-            "Republican Votes: ", Votes_REP, "<br>",
-            "Democrat Votes: ", Votes_DEM, "<br>",
-            "% Votes for GOP: ", politicalparty
+            "Republican Votes: ", scales::comma(Votes_REP), "<br>",
+            "Democrat Votes: ", scales::comma(Votes_DEM), "<br>",
+            "% Votes for GOP: ", scales::percent(politicalparty, accuracy = 1)
           ),
           layerId = ~County
         )
@@ -233,10 +233,6 @@ server <- function(input, output, session) {
       data <- data |>
         filter(Age_Category == input$ageCategory)
     }
-
-    # data <- data |>
-    #   group_by(County) |>
-    #   reframe(popProp = sum(Count, na.rm = TRUE) / first(countyPop))
     
     data <- data |>
       group_by(County, Year) |>  # Ensure grouping includes Year if it's relevant
@@ -259,8 +255,6 @@ server <- function(input, output, session) {
   # output ACS map based on selected filters
   output$map_ACS <- renderLeaflet({
     pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
-    
-    print(head(filter_pops()))
 
     leaflet(data = filter_pops()) |>
       addTiles() |>
@@ -271,8 +265,8 @@ server <- function(input, output, session) {
         color = "gray",
         popup = ~ paste(
           "County: ", County, "<br>",
-          "Total Pop.: ", countyPop, "<br>",
-          "% of Pop.: ", scales::percent(popProp)
+          "County Pop.: ", scales::comma(countyPop), "<br>",
+          "% of Pop.: ", scales::percent(popProp, accuracy = 0.01)
         ),
       ) |>
       addLegend("bottomright", 
