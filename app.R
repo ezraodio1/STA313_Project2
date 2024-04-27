@@ -198,8 +198,8 @@ server <- function(input, output, session) {
   
   # MAP 2: ACS Data ------------------------------------------------------------
   
+  # filter ACS data based on selected filters
   filter_pops <- reactive({
-    #req(input$year, input$race, input$sex, input$Age_Category)
     data <- ACS |>
       filter(Year == as.numeric(input$year))
     
@@ -229,7 +229,7 @@ server <- function(input, output, session) {
     data
   })
   
-  
+  # output ACS map based on selected filters
   output$map_ACS <- renderLeaflet({
     pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
     
