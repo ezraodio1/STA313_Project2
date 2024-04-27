@@ -71,13 +71,16 @@ ui <- fluidPage(
         sidebarPanel(
           h4("Global Filters"),
           selectInput("electionCounty", "Choose a County to Highlight:",
-                      choices = c("None" = "", sort(unique(election_data_combined$County))),
-                      selected = ""
+            choices = c(
+              "None" = "",
+              sort(unique(election_data_combined$County))
+            ),
+            selected = ""
           ),
           selectInput("year",
-                      "Election Year:",
-                      choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
-                      selected = "2020"
+            "Election Year:",
+            choices = c("2000", "2004", "2008", "2012", "2016", "2020"),
+            selected = "2020"
           ),
           hr(),
           h4("ACS Filters"),
@@ -86,16 +89,16 @@ ui <- fluidPage(
           #   selected = ""
           # ),
           selectInput("sex", "Sex:",
-                      choices = c("All", sort(unique(ACS$Sex))),
-                      selected = "All"
+            choices = c("All", sort(unique(ACS$Sex))),
+            selected = "All"
           ),
           selectInput("race", "Race:",
-                      choices = c("All", sort(unique(ACS$Race))),
-                      selected = "All"
+            choices = c("All", sort(unique(ACS$Race))),
+            selected = "All"
           ),
           selectInput("ageCategory", "Age Category:",
-                      choices = c("All", sort(unique(ACS$Age_Category))),
-                      selected = "All"
+            choices = c("All", sort(unique(ACS$Age_Category))),
+            selected = "All"
           )
         ),
         mainPanel(
@@ -114,7 +117,7 @@ ui <- fluidPage(
       titlePanel("Data Table")
     )),
     tabPanel("Animated Plot", fluidPage(
-      titlePanel("NC Over Time"), 
+      titlePanel("NC Over Time"),
       img(src = "nc_political.gif", alt = "Animated Election Map")
     ))
   )
@@ -139,11 +142,11 @@ server <- function(input, output, session) {
 
   # create palette to color counties by political orientation
   palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
-  
+
   # reactive expression for fillOpacity
   # fillOpacityCalc <- reactive({
   #   if (is.null(input$electionCounty) || input$electionCounty == "") {
-  #     return(rep(1, nrow(combined_data()))) 
+  #     return(rep(1, nrow(combined_data())))
   #   } else {
   #     return(ifelse(combined_data()$County == input$electionCounty, 1, 0.33))
   #   }
@@ -166,13 +169,14 @@ server <- function(input, output, session) {
         ),
         layerId = ~County
       ) |>
-      addLegend("bottomright", 
-                pal = palette, 
-                values = c(0, 1), 
-                title = "% Votes for GOP",
-                labFormat = labelFormat(
-                  transform = function(x) x * 100, suffix = "%")
-                )
+      addLegend("bottomright",
+        pal = palette,
+        values = c(0, 1),
+        title = "% Votes for GOP",
+        labFormat = labelFormat(
+          transform = function(x) x * 100, suffix = "%"
+        )
+      )
   })
 
   # keep track of county that was previously selected
@@ -247,12 +251,12 @@ server <- function(input, output, session) {
       data <- data |>
         filter(Age_Category == input$ageCategory)
     }
-    
+
     data <- data |>
-      group_by(County, Year) |>  # Ensure grouping includes Year if it's relevant
+      group_by(County, Year) |> # Ensure grouping includes Year if it's relevant
       summarise(
         TotalCount = sum(Count, na.rm = TRUE),
-        countyPop = first(countyPop)  # Ensure countyPop is maintained correctly
+        countyPop = first(countyPop) # Ensure countyPop is maintained correctly
       ) |>
       ungroup() |>
       mutate(
@@ -283,14 +287,15 @@ server <- function(input, output, session) {
           "% of Pop.: ", scales::percent(popProp, accuracy = 0.01)
         ),
       ) |>
-      addLegend("bottomright", 
-                pal = pop_palette, 
-                values = ~popProp,
-                title = "% of Population",
-                opacity = 1.0,
-                labFormat = labelFormat(
-                  transform = function(x) x * 100, suffix = "%")
-                )
+      addLegend("bottomright",
+        pal = pop_palette,
+        values = ~popProp,
+        title = "% of Population",
+        opacity = 1.0,
+        labFormat = labelFormat(
+          transform = function(x) x * 100, suffix = "%"
+        )
+      )
   })
 }
 
