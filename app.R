@@ -114,7 +114,8 @@ ui <- fluidPage(
       titlePanel("Data Table")
     )),
     tabPanel("Animated Plot", fluidPage(
-      titlePanel("NC Over Time")
+      titlePanel("NC Over Time"), 
+      img(src = "nc_political.gif", alt = "Animated Election Map")
     ))
   )
 )
