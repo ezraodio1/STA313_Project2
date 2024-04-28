@@ -180,12 +180,13 @@ server <- function(input, output, session) {
   })
 
   # keep track of county that was previously selected
-  lastSelected <- reactiveVal(NULL)
+  lastSelectedElection <- reactiveVal(NULL)
+  lastSelectedACS <- reactiveVal(NULL)
 
   # listen for changes to selected county
   observeEvent(input$electionCounty, {
     newSelection <- input$electionCounty
-    oldSelection <- lastSelected()
+    oldSelection <- lastSelectedElection()
 
     # reset previously selected county if applicable
     if (!is.null(oldSelection) && oldSelection != "" &&
@@ -227,7 +228,7 @@ server <- function(input, output, session) {
         )
     }
 
-    lastSelected(newSelection)
+    lastSelectedElection(newSelection)
   })
 
   # Map 2: ACS Data ------------------------------------------------------------
@@ -272,6 +273,8 @@ server <- function(input, output, session) {
 
   # output ACS map based on selected filters
   output$map_ACS <- renderLeaflet({
+    
+    # create palette to color ACS map
     pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
 
     leaflet(data = filter_pops()) |>
@@ -286,6 +289,7 @@ server <- function(input, output, session) {
           "County Pop.: ", scales::comma(countyPop), "<br>",
           "% of Pop.: ", scales::percent(popProp, accuracy = 0.01)
         ),
+        layerId = ~County
       ) |>
       addLegend("bottomright",
         pal = pop_palette,
@@ -296,6 +300,52 @@ server <- function(input, output, session) {
           transform = function(x) x * 100, suffix = "%"
         )
       )
+  })
+  
+  observeEvent(input$electionCounty, {
+    newSelection <- input$electionCounty
+    oldSelection <- lastSelectedACS()
+    
+    # create palette to color ACS map
+    pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
+    
+    if (!is.null(oldSelection) && oldSelection != "" &&
+        any(filter_pops()$County == oldSelection)) {
+      leafletProxy("map_ACS") |>
+        removeShape(layerId = oldSelection) |>
+        addPolygons(
+          data = filter_pops() |> filter(County == oldSelection),
+          fillColor = ~ pop_palette(popProp),
+          fillOpacity = 1,
+          color = "gray",
+          weight = 1,
+          popup = ~ paste(
+            "County: ", County, "<br>",
+            "County Pop.: ", scales::comma(countyPop), "<br>",
+            "% of Pop.: ", scales::percent(popProp, accuracy = 0.01)
+          ),
+          layerId = ~County
+        )
+    }
+    
+    if (newSelection != "" && any(filter_pops()$County == newSelection)) {
+      leafletProxy("map_ACS") |>
+        addPolygons(
+          data = filter_pops() |> filter(County == newSelection),
+          fillColor = "yellow",
+          fillOpacity = 1,
+          color = "black",
+          weight = 6,
+          popup = ~ paste(
+            "Highlighted County: ", County, "<br>",
+            "County Pop.: ", scales::comma(countyPop), "<br>",
+            "% of Pop.: ", scales::percent(popProp, accuracy = 0.01)
+          ),
+          layerId = ~County
+        )
+    }
+    
+    lastSelectedACS(newSelection)
   })
 }
 
