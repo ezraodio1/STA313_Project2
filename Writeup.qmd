@@ -8,7 +8,7 @@ editor: visual
 
 ## Introduction
 
-Our team was very interested in United States politics especially with the 2024 National Election coming up. North Carolina was the best state to investigate as students of a North Carolina University and as North Carolina is usually considered a swing state. We are very interested in understanding the breakdown of votes and demographics by county to understand which counties are especially determining the state's outcome every election. We will be examining the breakdown of Democratic vs. Republican votes by county over the last six elections as well as the breakdown of different demographics in those counties. We decided to focus on sex, age and race for the specific demographics and we are only examining votes for Presidential elections. Our app presents users with dynamic maps, tables, and an animated visualization and is intended for policymakers and the general public to have an accessible tool that allows them to analyze North Carolina's political trends, and especially how demographic trends coorrelate with voting patterns throughout the previous six elections.
+Our team had a keen interest in United States politics especially with the 2024 National Election coming up. North Carolina was the best state to investigate as students of a North Carolina University and as North Carolina is usually considered a swing state. We are very interested in understanding the breakdown of votes and demographics by county to understand which counties are especially determining the state's outcome every election. We will be examining the breakdown of Democratic vs. Republican votes by county over the last six elections as well as the breakdown of different demographics in those counties. We decided to focus on sex, age and race for the specific demographics and we are only examining votes for Presidential elections. Our app presents users with dynamic maps, tables, and an animated visualization and is intended for policymakers and the general public to have an accessible tool that allows them to analyze North Carolina's political trends, and especially how demographic trends coorrelate with voting patterns throughout the previous six elections.
 
 ## Data
 
@@ -33,3 +33,13 @@ A trend that we were following throughout the making of this project was how str
 (Add Table Here to Make this Easier to Read)
 
 Additionally, we noticed increasing political polarization in North Carolina over time. Looking at the animated plot of Political Distribution in North Carolina over time, we can notice the "blue" and "red" becoming of a darker hue in many of the same counties over time. Indicating that counties become either more "red" or more "blue" distancing from a neutral stance. There is data to support that political polarization has been on the "up" since the election of 2016 (Donald Trump vs Hillary Clinton) and it was interesting to see the North Carolina data support this conclusion as especially in 2016 and 2020 the intensity of the hues indicating republican or democrat votes increased.
+
+(With additional animated plots / the data table feature we can add to this section)
+
+## Conclusion
+
+In conclusion, our Shiny app allows users to view electoral trends alongside demographic changes in North Carolina over the past six elections. By integrating the two, users can get a hollistic sense of the causes behind the electoral trends in North Carolina and the reasons behind the "swing state" nature of NC. Our findings underscored the importance of race, sex, and age \[need to add more to prove this in the analysis section\] have had on election data, but has highlighted the significant polarization occuring in the state.
+
+By creating three different facets to display information (leaflet plots, data tables, and animated visualizations) we are allowing the user to understand the intricacies behind the changing voter trends in North Carolina as well as enabling policymakers to make educated predictions for the 2024 National Election.
+
+We hope that this project allows all North Carolinians and politics enthusiasts to understand the complex voter dynamics that occur in the state and contributed to more informed policy discussions in the near future.
