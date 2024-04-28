@@ -347,6 +347,11 @@ server <- function(input, output, session) {
     
     lastSelectedACS(newSelection)
   })
+  
+  # reset selected county any time a filter is changed
+  # observeEvent(c(input$year, input$race, input$sex, input$ageCategory, input$year), {
+  #   updateSelectInput(session, "electionCounty", selected = "")
+  # })
 }
 
 shinyApp(ui = ui, server = server)
