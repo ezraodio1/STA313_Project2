@@ -9,6 +9,8 @@ library(readr)
 library(tidyverse)
 library(sf)
 library(DT)
+#install.packages("shinyWidgets")
+library(shinyWidgets)
 
 
 # load data --------------------------------------------------------------------
@@ -136,9 +138,10 @@ server <- function(input, output, session) {
         Year == as.numeric(input$year),
         if(input$race != "All") Race == input$race else TRUE,
         if(input$sex != "All") Sex == input$sex else TRUE,
-        if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
+        if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE,
+        if(input$Year != 'All') Year == input$Year else TRUE
       ) |>
-      select(County, Year, Race, Sex, Count)
+      select(County, Year, Race, Sex, Count, Age_Category)
     data
   })
     
@@ -151,9 +154,14 @@ output$data_table <- renderDataTable({
       searching = TRUE,
       lengthMenu = c(10, 50, 100)
     ),
-    filter = "top"
-  )
-})
+    filter = "top",
+    rownames = FALSE,
+  ) |>
+    formatStyle(
+      columns = c('County', 'Year', 'Race', 'Sex', 'Count', 'Age_Category'),
+      fontWeight = 'bold'
+    ) 
+  })
   
   
     
