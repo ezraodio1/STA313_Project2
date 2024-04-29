@@ -11,7 +11,8 @@ library(sf)
 library(DT)
 #install.packages("shinyWidgets")
 library(shinyWidgets)
-
+#install.packages("shinythemes")
+library(shinythemes)
 
 # load data --------------------------------------------------------------------
 election_data_combined <- read_csv("data/election_data_wide_geo.csv",
@@ -67,6 +68,7 @@ ACS <- merge(ACS, county_pops, by = c("County", "Year"))
 
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
+  theme = shinytheme("superhero"),
   # titlePanel("North Carolina Election Data"),
   tabsetPanel(
     tabPanel("Home", fluidPage(
