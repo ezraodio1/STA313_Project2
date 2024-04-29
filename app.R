@@ -141,8 +141,20 @@ ui <- fluidPage(
       titlePanel("NC Over Time"),
       img(src = "nc_political.gif", alt = "Animated Election Map")
     ))
+  ),
+  tags$head(
+    tags$style(HTML("
+                    .dataTable .dataTables_wrapper {
+                    color : #FFFFFF; /*
+                    }
+                    .dataTable tbody tr td {
+                    color: #FFFFFF;
+                    }
+                    "))
+    ),
+  dataTableOutput("data_table")
   )
-)
+
 
 # define server logic ----------------------------------------------------------
 server <- function(input, output, session) {
