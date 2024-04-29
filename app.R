@@ -8,6 +8,7 @@ library(RColorBrewer)
 library(readr)
 library(tidyverse)
 library(sf)
+library(DT)
 
 
 # load data --------------------------------------------------------------------
@@ -114,7 +115,8 @@ ui <- fluidPage(
       titlePanel("Write-Up")
     )),
     tabPanel("Data Table", fluidPage(
-      titlePanel("Data Table")
+      titlePanel("Data Table"),
+      dataTableOutput("data_table")
     )),
     tabPanel("Animated Plot", fluidPage(
       titlePanel("NC Over Time"),
@@ -125,8 +127,37 @@ ui <- fluidPage(
 
 # define server logic ----------------------------------------------------------
 server <- function(input, output, session) {
-  # Map 1: Election data -------------------------------------------------------
-
+  
+  
+# data table feature  ----------------------------------------------------------
+  user_filtered <-reactive({
+    data <- ACS_all_long |>
+      filter(
+        Year == as.numeric(input$year),
+        if(input$race != "All") Race == input$race else TRUE,
+        if(input$sex != "All") Sex == input$sex else TRUE,
+        if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
+      )
+    data
+  })
+    
+output$data_table <- renderDataTable({
+  datatable(
+    user_filtered(),
+    options = list(
+      pageLength = 50,
+      autoWidth = TRUE,
+      searching = TRUE,
+      lengthMenu = c(10, 50, 100)
+    ),
+    filter = "top"
+  )
+})
+  
+  
+    
+# Map 1: Election data ---------------------------------------------------------
+  
   # calculate political orientation of each county based on selected year
   combining_rep_dem <- reactive({
     election_data_combined |>
