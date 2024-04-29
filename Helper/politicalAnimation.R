@@ -29,7 +29,8 @@ nc_political <- ggplot(full_data, aes(fill = politicalparty)) +
   scale_fill_gradient2(
     low = "blue", mid = "white", high = "red", midpoint = 0.5,
     limit = c(0, 1), space = "Lab",
-    name = "Republican Vote Proportion"
+    name = "% Votes for GOP",
+    labels = scales::percent
   ) +
   facet_wrap(~Year)
 
@@ -40,11 +41,7 @@ nc_political_animated <- nc_political +
   labs(
     title = "Political Distribution in {current_frame}"
   ) +
-  scale_fill_gradient2(
-    low = "blue", mid = "white", high = "red", midpoint = 0.5,
-    limit = c(0, 1), space = "Lab",
-    name = "Republican Vote Proportion"
-  )
+  theme(legend.position = "right")
 
 # save the gif
 anim_save("www/nc_political.gif", nc_political_animated,

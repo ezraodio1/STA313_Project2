@@ -3,6 +3,8 @@ library(ggplot2)
 library(readr)
 library(dplyr)
 library(gganimate)
+library(tidyverse)
+library(scales)
 
 # load and prepare the geographic data
 counties_geo <- st_read("data/nc_counties.geojson") |>
@@ -59,7 +61,8 @@ nc_population <- ggplot(full_data, aes(fill = countyPop)) +
   theme_minimal() +
   scale_fill_gradient(
     low = "white", high = "darkgreen",
-    name = "County Population"
+    name = "County Population",
+    labels = scales::comma
   ) +
   facet_wrap(~Year)
 
@@ -70,8 +73,9 @@ nc_population_animated <- nc_population +
   labs(
     title = "North Carolina Population Distribution in {current_frame}",
     fill = "County Population"
-  )
+  ) +
+  theme(legend.position = "right")
 
 anim_save("www/nc_population.gif", nc_population_animated,
-  renderer = gifski_renderer()
+          renderer = gifski_renderer()
 )
