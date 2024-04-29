@@ -116,9 +116,13 @@ ui <- fluidPage(
     tabPanel("Write-Up", fluidPage(
       titlePanel("Write-Up")
     )),
-    tabPanel("Data Table", fluidPage(
-      titlePanel("Data Table"),
+    tabPanel("ACS: Data Table", fluidPage(
+      titlePanel("ACS Data Table"),
       dataTableOutput("data_table")
+    )),
+    tabPanel("Election Votes: Data Table", fluidPage(
+      titlePanel("Election Votes"),
+      dataTableOutput("election_data_table")
     )),
     tabPanel("Animated Plot", fluidPage(
       titlePanel("NC Over Time"),
@@ -131,17 +135,15 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   
-# data table feature  ----------------------------------------------------------
+# ACS data table ---------------------------------------------------------------
   user_filtered <-reactive({
     data <- ACS_all_long |>
       filter(
-        Year == as.numeric(input$year),
         if(input$race != "All") Race == input$race else TRUE,
         if(input$sex != "All") Sex == input$sex else TRUE,
-        if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE,
-        if(input$Year != 'All') Year == input$Year else TRUE
+        if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
       ) |>
-      select(County, Year, Race, Sex, Count, Age_Category)
+      select(County, Race, Sex, Age_Category, Count)
     data
   })
     
@@ -158,12 +160,36 @@ output$data_table <- renderDataTable({
     rownames = FALSE,
   ) |>
     formatStyle(
-      columns = c('County', 'Year', 'Race', 'Sex', 'Count', 'Age_Category'),
+      columns = c('County', 'Race', 'Sex', 'Age_Category', 'Count'),
       fontWeight = 'bold'
     ) 
   })
   
-  
+# Election data table ----------------------------------------------------------
+
+user_filtered2 <-reactive({
+  data <- election_data_combined |>
+    select(County, Year, Votes_DEM, Votes_REP, Population)
+  data
+})
+
+output$election_data_table <- renderDataTable({
+  datatable(
+    user_filtered2(),
+    options = list(
+      pageLength = 50,
+      autoWidth = TRUE,
+      searching = TRUE,
+      lengthMenu = c(10, 50, 100)
+    ),
+    filter = "top",
+    rownames = FALSE,
+  ) |>
+    formatStyle(
+      columns = c('County', 'Year', 'Votes_DEM', 'Votes_REP', 'Population'),
+      fontWeight = 'bold'
+    ) 
+})
     
 # Map 1: Election data ---------------------------------------------------------
   
