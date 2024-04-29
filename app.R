@@ -137,7 +137,8 @@ server <- function(input, output, session) {
         if(input$race != "All") Race == input$race else TRUE,
         if(input$sex != "All") Sex == input$sex else TRUE,
         if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
-      )
+      ) |>
+      select(County, Year, Race, Sex, Count)
     data
   })
     
