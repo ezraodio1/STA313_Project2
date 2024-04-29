@@ -158,6 +158,7 @@ server <- function(input, output, session) {
         if(input$sex != "All") Sex == input$sex else TRUE,
         if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
       ) |>
+      mutate(Count = as.integer(Count)) |>
       select(County, Race, Sex, Age_Category, Count)
     data
   })
@@ -184,6 +185,10 @@ output$data_table <- renderDataTable({
 
 user_filtered2 <-reactive({
   data <- election_data_combined |>
+    mutate(Year = as.integer(Year)) |>
+    mutate(Votes_DEM = as.integer(Votes_DEM)) |>
+    mutate(Votes_REP = as.integer(Votes_REP)) |>
+    mutate(Population = as.integer(Population)) |>
     select(County, Year, Votes_DEM, Votes_REP, Population)
   data
 })
