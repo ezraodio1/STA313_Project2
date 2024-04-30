@@ -5,11 +5,22 @@ https://www.ncsbe.gov/results-data/election-results/historical-election-results-
 
 https://www.osbm.nc.gov/facts-figures/population-demographics
 
-We are using 12 data sets, 6 from ACS and 6 for registration data. We provided 
-one dataset for each of those categories and the only thing that changes is 
-the year. 
+We are using 12 data sets, 6 from ACS and 6 for registration data. Each of the 6 ACS and 6 election data sets are the same with the exception of year.
 
-For the ACS data these are the columns and their meaning
+Datacleaning_ACS includes our code for the data cleaning we did to all the ACS data sets.
+
+Datacleaning_votes includes our code for the data cleaning we did to all the election data sets.
+
+politicalAnimation includes code for the animation we created that shows the change in political party votes over the last 6 elections by county in NC.
+
+populationAnimation includes code for the animation we created that shows the change in population over the last 6 elections by county in NC.
+
+NCCounties2.csv has data on the counties in NC
+- `name`: Name of county
+- `lat`: Latitude 
+- `lon`: Longitude
+
+The ACS data sets are called ACS[year]. For the ACS data these are the columns and their meaning
 - `fips`: Federal Information Processing Standards code that uniquely identifies counties.
 - `County`: Name of the county.
 - `Region`: The region in which the county is located.
@@ -32,18 +43,19 @@ For the ACS data these are the columns and their meaning
 - `Vintage`: Year of the vintage.
 - `geom`: Geometry information for mapping.
 - `geo_point_2d`: Geographic point in 2D.
+Our clean datasets after Datacleaning_ACS are called ACS[year].
 
-The election data sets are called Election[year]_summary. There are 6 of them: one for each election year. Each data set contains 3 columns:
+The election data sets are called [year].txt. There are 6 of them: one for each election year. Each data set contains 3 columns:
 - `Couunty`: North Carolina County
 - `Choice_Party`: The political party
 - `Total_Votes`: Total votes for that specific county and political party.
+Our clean datasets after Datacleaning_votes are called County_totals[year].
 
 
-After cleaning our data sets we are left with two data sets one called ACSall 
-and the other is election_data. 
-
-ACSall is a merged dataset of the 6 individual asc csv for 2000,2004,2008,2012,
-2016 and 2020 with the same variables as before. 
+After cleaning our data sets we are left with:
+1. 6 different ACS data sets labeled ACS[year], this is because the datsets were too large to merge and push.
+2. election-data which contains the combined, cleaned County_total data sets
+2. election_data_wide_geo which contains the election data joined with the county geo information
 
 election_data is also a merged data set with all the 6 individual election data
 that contains 1000 observations and 4 variables:
