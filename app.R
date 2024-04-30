@@ -164,24 +164,29 @@ ui <- fluidPage(
     tabPanel("Animated Plots", fluidPage(
       titlePanel("North Carolina Over Time"),
       div(
-        style = "display: flex; justify-content: center; align-items: center; flex-wrap: wrap;", 
+        style = "display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 20px;",  # Added gap for spacing
         # First div with vertical layout for the first map
         div(
-          style = "display: flex; flex-direction: column; align-items: center; margin: 0px; max-width: 450px;",  
-          h3("Animated Election Map", style = "margin-bottom: 0;"),
-          img(src = "nc_political.gif", style = "width: 100%; height: auto; margin-top: 0px;"),
-          p("Disribution of % votes for GOP by county over the past 6 elections")
+          style = "display: flex; flex-direction: column; align-items: center; margin: 10px; max-width: 450px;",
+          h3("Animated Election Map"),
+          tags$a(href = "nc_political.gif", target = "_blank",
+                 img(src = "nc_political.gif", style = "width: 100%; height: auto; cursor: pointer;")
+          ),
+          p("Distribution of % votes for GOP by county over the past 6 elections")
         ),
         
         div(
-          style = "display: flex; flex-direction: column; align-items: center; margin: 0px; max-width: 450px;",  
-          h3("Animated Population Map", style = "margin-bottom: 0;"),
-          img(src = "nc_population.gif", style = "width: 100%; height: auto; margin-top: 0px;"),
-          p("Disribution of popultion by county over the past 6 elections years")
+          style = "display: flex; flex-direction: column; align-items: center; margin: 10px; max-width: 450px;",
+          h3("Animated Population Map"),
+          tags$a(href = "nc_population.gif", target = "_blank",
+                 img(src = "nc_population.gif", style = "width: 100%; height: auto; cursor: pointer;")
+          ),
+          p("Distribution of population by county over the past 6 elections years")
         )
+      ),
+      p("Click the plot and zoom in to view it in a larger format.")
       )
     ))
-  )
   )
 
 
