@@ -31,6 +31,7 @@ ACS2012_cleaned <- read_csv("data/ACS2012_cleaned.csv", show_col_types = FALSE)
 ACS2016_cleaned <- read_csv("data/ACS2016_cleaned.csv", show_col_types = FALSE)
 ACS2020_cleaned <- read_csv("data/ACS2020_cleaned.csv", show_col_types = FALSE)
 
+#combine ACS data sets
 ACS_all <- rbind(
   ACS2000_cleaned,
   ACS2004_cleaned,
@@ -40,6 +41,7 @@ ACS_all <- rbind(
   ACS2020_cleaned
 )
 
+#pivot ACS_all dataset for easier filtering
 ACS_all_long <- pivot_longer(
   ACS_all,
   cols = starts_with("Age"),
@@ -60,6 +62,7 @@ ACS <- ACS_all_long |>
     Long = as.numeric(Long)
   )
 
+#Add column that calculates county population
 county_pops <- ACS |>
   group_by(County, Year) |>
   reframe(countyPop = sum(Count, na.rm = TRUE))
@@ -69,11 +72,11 @@ ACS <- merge(ACS, county_pops, by = c("County", "Year"))
 # Define UI for application ----------------------------------------------------
 ui <- fluidPage(
   theme = shinytheme("cerulean"),
-  # titlePanel("North Carolina Election Data"),
   tabsetPanel(
     tabPanel("Home", fluidPage(
       sidebarLayout(
         sidebarPanel(
+          #Add filters that work for both maps
           h4("Global Filters"),
           selectInput("electionCounty", "Choose a County to Highlight:",
             choices = c(
@@ -88,11 +91,8 @@ ui <- fluidPage(
             selected = "2020"
           ),
           hr(),
+          #Add ACS specific filters
           h4("ACS Filters"),
-          # selectInput("ACScounty", "Choose a County to View:",
-          #   choices = c("None" = "", sort(unique(ACS$County))),
-          #   selected = ""
-          # ),
           selectInput("sex", "Sex:",
             choices = c("All", sort(unique(ACS$Sex))),
             selected = "All"
@@ -109,12 +109,12 @@ ui <- fluidPage(
         mainPanel(
           h4("Election Data Map", style = "text-align: center;"),
           leafletOutput("map_election", height = "350px"),
-          # div(style = "margin-top: 20px;"),
           h4("ACS Data Map", style = "text-align: center;"),
           leafletOutput("map_ACS", height = "350px")
         )
       )
     )),
+    #Add write up in a tab in app
     tabPanel("Write-Up", fluidPage(
       titlePanel("Write-Up"),
       h3("Introduction"),
@@ -129,14 +129,17 @@ ui <- fluidPage(
       p("We chose to use a shiny app with two leaflet maps because it allows easy examination of the differences from year to year, county to county and from specific filters. We also added an animation at the end that shows the county breakdown of dem votes vs. rep votes over the 6 elections to get a better idea of how the individual counties changed. Layering the shiny app and leaflet maps allows the user to zoom in and zoom out as they please to see the rest of the United States' map."),
       h3("Going to add the rest when finalized")
     )),
+    #Add tab for ACS data table
     tabPanel("ACS: Data Table", fluidPage(
       titlePanel("ACS Data Table"),
       dataTableOutput("data_table")
     )),
+    #Add tab for election data table
     tabPanel("Election Votes: Data Table", fluidPage(
       titlePanel("Election Votes"),
       dataTableOutput("election_data_table")
     )),
+    #Add tab for animated plots 
     tabPanel("Animated Plot", fluidPage(
       titlePanel("NC Over Time"),
       img(src = "nc_political.gif", alt = "Animated Election Map"),
@@ -151,6 +154,7 @@ server <- function(input, output, session) {
   
   
 # ACS data table ---------------------------------------------------------------
+  #create reactive filters for ACS
   user_filtered <-reactive({
     data <- ACS_all_long |>
       filter(
@@ -163,6 +167,7 @@ server <- function(input, output, session) {
     data
   })
     
+  #create reactive filters for data table for ACS
 output$data_table <- renderDataTable({
   datatable(
     user_filtered(),
@@ -183,6 +188,7 @@ output$data_table <- renderDataTable({
   
 # Election data table ----------------------------------------------------------
 
+#create reactive filters for election (this is just county and year)
 user_filtered2 <-reactive({
   data <- election_data_combined |>
     mutate(Year = as.integer(Year)) |>
@@ -193,6 +199,7 @@ user_filtered2 <-reactive({
   data
 })
 
+#create reactive filters for data table for election
 output$election_data_table <- renderDataTable({
   datatable(
     user_filtered2(),
@@ -228,15 +235,6 @@ output$election_data_table <- renderDataTable({
 
   # create palette to color counties by political orientation
   palette <- colorNumeric(c("blue", "white", "red"), domain = c(0, 1))
-
-  # reactive expression for fillOpacity
-  # fillOpacityCalc <- reactive({
-  #   if (is.null(input$electionCounty) || input$electionCounty == "") {
-  #     return(rep(1, nrow(combined_data())))
-  #   } else {
-  #     return(ifelse(combined_data()$County == input$electionCounty, 1, 0.33))
-  #   }
-  # })
 
   # render map based on selected year
   output$map_election <- renderLeaflet({
@@ -388,6 +386,7 @@ output$election_data_table <- renderDataTable({
       )
   })
   
+  # listen for changes to selected county
   observeEvent(input$electionCounty, {
     newSelection <- input$electionCounty
     oldSelection <- lastSelectedACS()
@@ -395,6 +394,7 @@ output$election_data_table <- renderDataTable({
     # create palette to color ACS map
     pop_palette <- colorNumeric("Greens", domain = filter_pops()$popProp)
     
+    # reset previously selected county if applicable
     if (!is.null(oldSelection) && oldSelection != "" &&
         any(filter_pops()$County == oldSelection)) {
       leafletProxy("map_ACS") |>
@@ -414,6 +414,7 @@ output$election_data_table <- renderDataTable({
         )
     }
     
+    # highlight selected county if valid
     if (newSelection != "" && any(filter_pops()$County == newSelection)) {
       leafletProxy("map_ACS") |>
         addPolygons(
@@ -434,10 +435,6 @@ output$election_data_table <- renderDataTable({
     lastSelectedACS(newSelection)
   })
   
-  # reset selected county any time a filter is changed
-  # observeEvent(c(input$year, input$race, input$sex, input$ageCategory, input$year), {
-  #   updateSelectInput(session, "electionCounty", selected = "")
-  # })
 }
 
 shinyApp(ui = ui, server = server)
