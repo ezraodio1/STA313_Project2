@@ -160,7 +160,7 @@ ui <- fluidPage(
       titlePanel("Election Votes"),
       dataTableOutput("election_data_table")
     )),
-    #Add tab for animated plots 
+    #Add tab for animated plot
     tabPanel("Animated Plots", fluidPage(
       titlePanel("North Carolina Over Time"),
       div(
