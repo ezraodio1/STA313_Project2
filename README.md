@@ -7,7 +7,8 @@ https://www.osbm.nc.gov/facts-figures/population-demographics
 
 We are using 12 data sets, 6 from ACS and 6 for registration data. Each of the 6 ACS and 6 election data sets are the same with the exception of year.
 
-Helper Function: includes our data cleaning files we used to clean election data sets, ACS data sets and combine geo county data with the election data
+Helper Function: includes our data cleaning files we used to clean election data sets, ACS data sets and combine geo county data with the election data. In the helper function data folder it contains all 
+of the txt. and csv files we pulled directly from the websites we are using. 
 
 Within the data folder the follow data sets are included:
 NCCounties2.csv has data on the counties in NC
