@@ -66,9 +66,10 @@ NCDOT_County_Boundaries contains data on county location the only things we are 
 - `ShapeSTArea`: The calculated area of the county based on its geometric representation in the shapefile
 - `ShapeSTLength`: The length of the perimeter of the county as calculated from the geometric data in the shapefile
 
-animated gifs contain:
+www contain:
 nc_politcal.gif is an animation of the count of political votes by county in North Carolina over the past 6 elections
 nc_population.gif is an animation of the population by county in North Carolina over the past 6 elections
+logo.png is the stat 313 course logo
 
 proposal.qmd contains our project proposal
 

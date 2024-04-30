@@ -74,6 +74,27 @@ ui <- fluidPage(
   theme = shinytheme("cerulean"),
   tabsetPanel(
     tabPanel("Home", fluidPage(
+      div(
+        style = "display: flex; justify-content: space-between; align-items: center;",  # Flexbox for layout
+        h1("Team Spring", style = "flex-grow: 1;"),  # Title grows to take available space
+        img(src = "logo.png", style = "height: 90px; width: auto;")  # Controlled size for image
+      ),
+      h3("Overiew of app"),
+      h4("Interactive Maps"),
+      p("The interactive maps tap displays two maps of North Carolina by county. The filters on the left hand side display different filters for the map. The global filters work on both maps. When you select a county, nothing changes with the how the data is filtered, but that county will highlight in yellow on both maps. When you select a year both the election data map and ACS map will filter for only data from that year. The election data map will show percentage of votes for the specified year, and the ACS map will show population data for the specified year. The next set of filters only work for the ACS map and are labeled ACS filters. Here you have the option to select race, sex, or age. You can select from only one of these filters or all of these filters. For example if you select just female then the data on the ACS map will show the percentage population that is female by county. If you select female, black, and Age 18 to 19 then the ACS map would show the percentage of population that is female, black, and 18 to 19."),
+      h5("Election Data Map"),
+      p("The Election Data Map displays the percentage of votes per GOP (Republican Party). For example if a county displays as 40% votes per GOP this mean that within that county 40% of their votes were republican, while 60% of their votes democrat. The counties that are colored more purple mean that they had a higher percentage of democratic votes and the counties that are colored red mean that they had a higher percentage of republican votes. "),
+      h5("ACS Map"),
+      p("The ACS Map displays the percentage of the population in the county for any given filters selected. When the map first appears, since no filters are selected each county shows 100% population. However, when filters are selected the counties will show the corresponding percentage of population. A county colored closer to white shows a smaller percentage of the population and a county colored closer to green shows a larger percentage of the population."),
+      h4("Write-up"),
+      p("The write-up tab includes our approach, methods, and anlysis for the project."),
+      h4("ACS Data Table"),
+      p("The ACS data table tab includes a data set with all of the ACS data broken down to the most specific county of population. Here you have the ability to look at specific counts of population. You can filter by any or all of county, race, sex, age, and population. For example if you wanted to see what counties have a female population greater than 100,000, you would select female for age and move the toggle for count from (0 to max) to (100,000 to max)."),
+      h4("Election Votes Data Table"),
+      p("The Election Votes data table tab includes a data set with all of the Election data. Here you have the ability to view the democrat, republican, and total count of votes by county. You have the option to filter by county, year, max and min democratic votes, max and min republican votes, and max and min total votes. For example if you wanted to view which counties for each year had more than 100,000 democratic votes but less than 500,000 people you could move the Votes_DEM toggle to (100,000 to max) and the Population toggle to (0 to 500,000). Note that population includes children under 18 not just the voting population. "),
+      h4("Animaed Plot"),
+      p("The Animated Plots tab shows two different animated plots. The first plot shows the change in % votes of GOP (Republican Party) over the past 6 elections by county. The second plot shows the change in population distribution of the last 6 election years."))),
+    tabPanel("Interactive Maps", fluidPage(
       sidebarLayout(
         sidebarPanel(
           #Add filters that work for both maps
@@ -140,10 +161,25 @@ ui <- fluidPage(
       dataTableOutput("election_data_table")
     )),
     #Add tab for animated plots 
-    tabPanel("Animated Plot", fluidPage(
-      titlePanel("NC Over Time"),
-      img(src = "nc_political.gif", alt = "Animated Election Map"),
-      img(src = "nc_population.gif", alt = "Animated Population Map")
+    tabPanel("Animated Plots", fluidPage(
+      titlePanel("North Carolina Over Time"),
+      div(
+        style = "display: flex; justify-content: center; align-items: center; flex-wrap: wrap;", 
+        # First div with vertical layout for the first map
+        div(
+          style = "display: flex; flex-direction: column; align-items: center; margin: 0px; max-width: 450px;",  
+          h3("Animated Election Map", style = "margin-bottom: 0;"),
+          img(src = "nc_political.gif", style = "width: 100%; height: auto; margin-top: 0px;"),
+          p("Disribution of % votes for GOP by county over the past 6 elections")
+        ),
+        
+        div(
+          style = "display: flex; flex-direction: column; align-items: center; margin: 0px; max-width: 450px;",  
+          h3("Animated Population Map", style = "margin-bottom: 0;"),
+          img(src = "nc_population.gif", style = "width: 100%; height: auto; margin-top: 0px;"),
+          p("Disribution of popultion by county over the past 6 elections years")
+        )
+      )
     ))
   )
   )
