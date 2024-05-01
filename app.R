@@ -7,12 +7,14 @@ library(scales)
 library(RColorBrewer)
 library(readr)
 library(tidyverse)
+
 library(sf)
 library(DT)
 #install.packages("shinyWidgets")
 library(shinyWidgets)
 #install.packages("shinythemes")
 library(shinythemes)
+library(rsconnect)
 
 # load data --------------------------------------------------------------------
 election_data_combined <- read_csv("data/election_data_wide_geo.csv",
@@ -93,7 +95,10 @@ ui <- fluidPage(
       h4("Election Votes Data Table"),
       p("The Election Votes data table tab includes a data set with all of the Election data. Here you have the ability to view the democrat, republican, and total count of votes by county. You have the option to filter by county, year, max and min democratic votes, max and min republican votes, and max and min total votes. For example if you wanted to view which counties for each year had more than 100,000 democratic votes but less than 500,000 people you could move the Votes_DEM toggle to (100,000 to max) and the Population toggle to (0 to 500,000). Note that population includes children under 18 not just the voting population. "),
       h4("Animaed Plot"),
-      p("The Animated Plots tab shows two different animated plots. The first plot shows the change in % votes of GOP (Republican Party) over the past 6 elections by county. The second plot shows the change in population distribution of the last 6 election years."))),
+      p("The Animated Plots tab shows two different animated plots. The first plot shows the change in % votes of GOP (Republican Party) over the past 6 elections by county. The second plot shows the change in population distribution of the last 6 election years."),
+      h4("Link to App "),
+      p("https://rawalmalika123.shinyapps.io/project-2-team_spring-v2/")
+      )),
     tabPanel("Interactive Maps", fluidPage(
       sidebarLayout(
         sidebarPanel(
