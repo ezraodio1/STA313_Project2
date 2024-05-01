@@ -30,11 +30,7 @@ We chose to use a shiny app with two leaflet maps because it allows easy examina
 
 A trend that we were following throughout the making of this project was how strongly race correlated with election votes. For example, in 2000, counties that had the most significant votes for the democratic party were also counties that had large Black populations. Specific counties include: Warren (32% Dem votes for the GOP and 26.12% Black Population), NorthHampton (33% Dem votes for the GOP and 28.58% Black Population), and Hertford (30% Dem votes for the GOP and 28.21% Black Population). Over time, we noticed the coorelation between race and democrat votes tapering off in these counties and lessening. For example, in the counties we mentioned, in 2020, Warren had 37% Dem votes for the GOP but only a 24% Black Population, NorthHampton had 40% Dem votes for the GOP but only a 27.16% Black population, and lastly, Hertford had 33% Dem votes for the GOP and a 28.27% Black Population.
 
-(Add Table Here to Make this Easier to Read)
-
 Additionally, we noticed increasing political polarization in North Carolina over time. Looking at the animated plot of Political Distribution in North Carolina over time, we can notice the "blue" and "red" becoming of a darker hue in many of the same counties over time. Indicating that counties become either more "red" or more "blue" distancing from a neutral stance. There is data to support that political polarization has been on the "up" since the election of 2016 (Donald Trump vs Hillary Clinton) and it was interesting to see the North Carolina data support this conclusion as especially in 2016 and 2020 the intensity of the hues indicating republican or democrat votes increased.
-
-(With additional animated plots / the data table feature we can add to this section)
 
 ## Conclusion
 
