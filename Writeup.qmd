@@ -43,3 +43,15 @@ In conclusion, our Shiny app allows users to view electoral trends alongside dem
 By creating three different facets to display information (leaflet plots, data tables, and animated visualizations) we are allowing the user to understand the intricacies behind the changing voter trends in North Carolina as well as enabling policymakers to make educated predictions for the 2024 National Election.
 
 We hope that this project allows all North Carolinian's and politics enthusiasts to understand the complex voter dynamics that occur in the state and contributed to more informed policy discussions in the near future.
+
+## **Sources**
+
+Election Data:[ https://www.ncsbe.gov/results-data/election-results/historical-election-results-data#by-precinct](https://www.ncsbe.gov/results-data/election-results/historical-election-results-data#by-precinct)
+
+Demographics Data:[ https://www.osbm.nc.gov/facts-figures/population-demographics](https://www.osbm.nc.gov/facts-figures/population-demographics)
+
+Layering a Shiny App onto Leaflet:[ https://rstudio.github.io/leaflet/articles/shiny.html](https://rstudio.github.io/leaflet/articles/shiny.html)
+
+Data tables in Shiny:[ https://shiny.posit.co/r/articles/build/datatables/](https://shiny.posit.co/r/articles/build/datatables/)
+
+Allowing the User to Select the \# of Rows in the Datatable:[ https://forum.posit.co/t/getting-the-user-selected-entry-of-a-data-table-in-shiny-to-actually-make-a-scatterplot/52419](https://forum.posit.co/t/getting-the-user-selected-entry-of-a-data-table-in-shiny-to-actually-make-a-scatterplot/52419)
