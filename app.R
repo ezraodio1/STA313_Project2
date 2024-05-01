@@ -221,7 +221,8 @@ server <- function(input, output, session) {
         if(input$ageCategory != "All") Age_Category == input$ageCategory else TRUE
       ) |>
       mutate(Count = as.integer(Count)) |>
-      select(County, Race, Sex, Age_Category, Count)
+      mutate(Year = as.integer(Year)) |>
+      select(County, Race, Sex, Age_Category, Year, Count)
     data
   })
     
@@ -239,7 +240,7 @@ output$data_table <- renderDataTable({
     rownames = FALSE,
   ) |>
     formatStyle(
-      columns = c('County', 'Race', 'Sex', 'Age_Category', 'Count'),
+      columns = c('County', 'Race', 'Sex', 'Age_Category', 'Year', 'Count'),
       fontWeight = 'bold'
     ) 
   })
